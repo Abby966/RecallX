@@ -1,4 +1,4 @@
-import httpx
+
 import os
 import io
 from typing import List
@@ -11,7 +11,6 @@ from dotenv import load_dotenv
 # Providers
 from groq import Groq as GroqClient
 from openai import OpenAI as OpenAIClient  # also used for DeepSeek via base_url
-
 
 # --------- ENV / Defaults ---------
 load_dotenv()
@@ -123,19 +122,38 @@ st.markdown(
     color: var(--rx-text) !important;
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
   }
-[data-testid="stTextInput"] input:focus,
-[data-testid="stTextArea"] textarea:focus,
-div[data-baseweb="input"] input:focus {
-  border-color: rgba(79,70,229,0.85) !important;
-  outline: none !important;
-  box-shadow: 0 0 0 3px rgba(79,70,229,0.28) !important;
-}
-/* Placeholder */
-[data-testid="stTextInput"] input::placeholder,
-[data-testid="stTextArea"] textarea::placeholder,
-div[data-baseweb="input"] input::placeholder {
-  color: #9aa3b2 !important;
-  opacity: 1 !important;
+
+  /* Inputs */
+  .stTextInput input, .stTextArea textarea {
+    border-radius: 12px !important;
+    border: 1px solid var(--rx-border) !important;
+    background: rgba(255,255,255,0.06) !important;
+    color: var(--rx-white) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+  .stTextInput input:focus, .stTextArea textarea:focus {
+    border-color: rgba(79,70,229,0.65) !important;
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(79,70,229,0.25) !important;
+  }
+
+  /* File uploader */
+  .rx-uploader {
+    border: 1px dashed rgba(255,255,255,0.28);
+    border-radius: 16px;
+    padding: 18px;
+    background: rgba(255,255,255,0.05);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+  .stFileUploader label div[data-testid="stMarkdownContainer"] p {
+    color: var(--rx-text-dim) !important;
+  }
+  .stFileUploader div[data-testid="stFileUploaderDropzone"] {
+    border-radius: 14px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)) !important;
+    border: 1px dashed rgba(255,255,255,0.28) !important;
+  }
+
   /* Chips */
   .rx-chip {
     display:inline-flex; align-items:center; gap:8px;
@@ -206,33 +224,6 @@ div[data-baseweb="input"] input::placeholder {
     margin-top: 28px;
     opacity: .9;
   }
-  [data-testid="stTextInput"] input,
-[data-testid="stTextArea"] textarea,
-div[data-baseweb="input"] input {
-  border-radius: 12px !important;
-  border: 1px solid var(--rx-border) !important;
-  background: rgba(255,255,255,0.06) !important;  /* glassy bg */
-  color: var(--rx-text) !important;               /* use dim-light text, not white */
-  caret-color: var(--rx-text) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
-}
-
-/* Focus style */
-[data-testid="stTextInput"] input:focus,
-[data-testid="stTextArea"] textarea:focus,
-div[data-baseweb="input"] input:focus {
-  border-color: rgba(79,70,229,0.65) !important;
-  outline: none !important;
-  box-shadow: 0 0 0 3px rgba(79,70,229,0.25) !important;
-}
-
-/* Placeholder */
-[data-testid="stTextInput"] input::placeholder,
-[data-testid="stTextArea"] textarea::placeholder,
-div[data-baseweb="input"] input::placeholder {
-  color: #9aa3b2 !important;
-  opacity: 1 !important;
-}
 </style>
 
     """,
@@ -303,15 +294,8 @@ def llm_answer(provider: str, model: str, api_key: str, question: str, context: 
     )
     user_msg = f"Question: {question}\n\nContext:\n{context}\n"
 
-    # <- NEW: use a client that ignores HTTP(S)_PROXY from the host
-    http_client = httpx.Client(
-        timeout=30.0,
-        follow_redirects=True,
-        trust_env=False,  # <— ignores HTTP_PROXY/HTTPS_PROXY/ALL_PROXY
-    )
-
     if provider == "groq":
-        client = GroqClient(api_key=api_key, http_client=http_client)
+        client = GroqClient(api_key=api_key)
         resp = client.chat.completions.create(
             model=model or "llama-3.1-8b-instant",
             messages=[{"role":"system","content":system_msg},{"role":"user","content":user_msg}],
@@ -320,7 +304,7 @@ def llm_answer(provider: str, model: str, api_key: str, question: str, context: 
         return resp.choices[0].message.content.strip()
 
     if provider == "openai":
-        client = OpenAIClient(api_key=api_key, http_client=http_client)
+        client = OpenAIClient(api_key=api_key)
         resp = client.chat.completions.create(
             model=model or "gpt-4o-mini",
             messages=[{"role":"system","content":system_msg},{"role":"user","content":user_msg}],
@@ -329,7 +313,7 @@ def llm_answer(provider: str, model: str, api_key: str, question: str, context: 
         return resp.choices[0].message.content.strip()
 
     if provider == "deepseek":
-        client = OpenAIClient(api_key=api_key, base_url="https://api.deepseek.com", http_client=http_client)
+        client = OpenAIClient(api_key=api_key, base_url="https://api.deepseek.com")
         resp = client.chat.completions.create(
             model=model or "deepseek-chat",
             messages=[{"role":"system","content":system_msg},{"role":"user","content":user_msg}],
@@ -338,6 +322,7 @@ def llm_answer(provider: str, model: str, api_key: str, question: str, context: 
         return resp.choices[0].message.content.strip()
 
     raise RuntimeError(f"Unknown provider: {provider}")
+
 # --------- Session state ---------
 if "messages" not in st.session_state:
     st.session_state.messages = [
