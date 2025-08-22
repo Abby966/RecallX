@@ -1,3 +1,4 @@
+
 import os
 import io
 from typing import List
@@ -50,21 +51,16 @@ st.markdown(
              radial-gradient(900px 500px at 110% 10%, rgba(16,185,129,0.12) 0%, transparent 60%),
              #0b1220;
     --rx-surface: rgba(255,255,255,0.06);
-    --rx-card: rgba(0,0,0,0.35);
-    --rx-card-weak: rgba(0,0,0,0.28);
-    --rx-border: rgba(255,255,255,0.18);
-    --rx-border-strong: rgba(255,255,255,0.28);
+    --rx-card: rgba(255,255,255,0.10);
+    --rx-border: rgba(255,255,255,0.22);
     --rx-text: #e6e6f0;
     --rx-text-dim: #b7bfd6;
-    --rx-text-muted: #9aa3bf;
     --rx-white: #ffffff;
-    --rx-black: #000000;
   }
 
   .stApp {
-    background: var(--rx-bg) !important;
-    background-attachment: fixed !important;
-    color: var(--rx-text) !important;
+    background: var(--rx-bg);
+    background-attachment: fixed;
   }
 
   /* Global container width */
@@ -74,22 +70,15 @@ st.markdown(
     max-width: 1200px !important;
   }
 
-  /* Default text colors (fix “still white” issues) */
-  .stMarkdown, .stText, .stTextInput, .stTextArea, .stSelectbox, .stMultiSelect, .stNumberInput, .stDateInput,
-  .stDataFrame, .stTable, .stExpander, .stTabs, .stRadio, .stCheckbox, label, p, li, span, code, pre {
-    color: var(--rx-text) !important;
-  }
-  a { color: #c9d3ff !important; }
-  a:hover { color: #e4e9ff !important; }
-
   /* Glass cards */
-  .rx-card, .stContainer, .stAlert, .stDataFrame, .stTable {
-    background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)), var(--rx-card) !important;
-    border: 1px solid var(--rx-border) !important;
-    border-radius: 18px !important;
+  .rx-card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+    border: 1px solid var(--rx-border);
+    border-radius: 18px;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06) !important;
+    padding: 18px 18px 14px 18px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06);
   }
 
   /* Header title */
@@ -97,88 +86,80 @@ st.markdown(
     font-weight: 800; 
     font-size: 2.3rem; 
     letter-spacing: -0.02em;
-    color: var(--rx-white) !important;
+    color: var(--rx-white);
     margin-bottom: 4px;
     text-shadow: 0 1px 0 rgba(0,0,0,0.4);
   }
-  .rx-tagline { color: var(--rx-text-dim) !important; font-weight: 500; }
+  .rx-tagline {
+    color: var(--rx-text-dim);
+    font-weight: 500;
+  }
 
   /* Buttons */
   .stButton > button {
-    border-radius: 12px !important;
-    border: 1px solid rgba(255,255,255,0.18) !important;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.18);
     background: linear-gradient(90deg, var(--rx-indigo), var(--rx-indigo-600)) !important;
     color: #fff !important;
-    font-weight: 700 !important;
-    letter-spacing: 0.02em !important;
-    box-shadow: 0 8px 24px rgba(79,70,229,0.35), inset 0 1px 0 rgba(255,255,255,0.12) !important;
-    transition: transform .06s ease, box-shadow .2s ease, filter .2s ease !important;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    box-shadow: 0 8px 24px rgba(79,70,229,0.35), inset 0 1px 0 rgba(255,255,255,0.12);
+    transition: transform .06s ease, box-shadow .2s ease, filter .2s ease;
   }
   .stButton > button:hover { 
     transform: translateY(-1px);
-    box-shadow: 0 12px 26px rgba(79,70,229,0.45), inset 0 1px 0 rgba(255,255,255,0.18) !important;
+    box-shadow: 0 12px 26px rgba(79,70,229,0.45), inset 0 1px 0 rgba(255,255,255,0.18);
     filter: saturate(1.05);
   }
-  .stButton > button:active { transform: translateY(0px) scale(.99); }
+  .stButton > button:active {
+    transform: translateY(0px) scale(.99);
+  }
 
   /* Secondary button */
   .stButton [data-testid="baseButton-secondary"] {
-    background: var(--rx-card-weak) !important;
+    background: rgba(255,255,255,0.06) !important;
     border: 1px solid var(--rx-border) !important;
     color: var(--rx-text) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
   }
 
-  /* Inputs (HIGH CONTRAST) */
-  .stTextInput input, .stTextArea textarea, .stNumberInput input, .stDateInput input,
-  .stSelectbox div[role="combobox"], .stMultiSelect div[role="combobox"] {
+  /* Inputs */
+  .stTextInput input, .stTextArea textarea {
     border-radius: 12px !important;
     border: 1px solid var(--rx-border) !important;
-    background: rgba(0,0,0,0.45) !important;       /* darker background */
+    background: rgba(255,255,255,0.06) !important;
     color: var(--rx-white) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
   }
-  .stTextInput input::placeholder,
-  .stTextArea textarea::placeholder {
-    color: var(--rx-text-muted) !important;
-    opacity: .9 !important;
-  }
-  .stTextInput input:focus, .stTextArea textarea:focus,
-  .stNumberInput input:focus, .stDateInput input:focus,
-  .stSelectbox div[role="combobox"]:focus-within,
-  .stMultiSelect div[role="combobox"]:focus-within {
-    border-color: rgba(79,70,229,0.70) !important;
+  .stTextInput input:focus, .stTextArea textarea:focus {
+    border-color: rgba(79,70,229,0.65) !important;
     outline: none !important;
     box-shadow: 0 0 0 3px rgba(79,70,229,0.25) !important;
   }
 
-  /* Fix Chrome autofill white background */
-  input:-webkit-autofill, textarea:-webkit-autofill {
-    -webkit-text-fill-color: var(--rx-white) !important;
-    -webkit-box-shadow: 0 0 0px 1000px rgba(0,0,0,0.45) inset !important;
-    box-shadow: 0 0 0px 1000px rgba(0,0,0,0.45) inset !important;
-    caret-color: var(--rx-white) !important;
-  }
-
   /* File uploader */
-  .rx-uploader,
-  .stFileUploader div[data-testid="stFileUploaderDropzone"] {
-    border: 1px dashed var(--rx-border-strong) !important;
-    border-radius: 16px !important;
-    padding: 18px !important;
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)), var(--rx-card-weak) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06) !important;
+  .rx-uploader {
+    border: 1px dashed rgba(255,255,255,0.28);
+    border-radius: 16px;
+    padding: 18px;
+    background: rgba(255,255,255,0.05);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
   }
   .stFileUploader label div[data-testid="stMarkdownContainer"] p {
     color: var(--rx-text-dim) !important;
+  }
+  .stFileUploader div[data-testid="stFileUploaderDropzone"] {
+    border-radius: 14px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)) !important;
+    border: 1px dashed rgba(255,255,255,0.28) !important;
   }
 
   /* Chips */
   .rx-chip {
     display:inline-flex; align-items:center; gap:8px;
-    background: rgba(79,70,229,0.18);
-    border: 1px solid rgba(79,70,229,0.45);
-    color: #e3e6ff;
+    background: rgba(79,70,229,0.15);
+    border: 1px solid rgba(79,70,229,0.35);
+    color: #cdd2ff;
     padding: 6px 10px; border-radius: 999px; 
     font-size: 12.5px; margin: 6px 6px 0 0;
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
@@ -188,17 +169,17 @@ st.markdown(
   .rx-chat { margin-top: 12px; }
   .rx-row { margin: 10px 0; }
 
-  /* Chat bubbles (HIGH CONTRAST) */
+  /* Bubbles */
   .rx-bubble {
     display: inline-block;
     padding: 12px 14px;
     border-radius: 18px;
     max-width: 78%;
-    background: rgba(0,0,0,0.45) !important;   /* darker default bubble */
-    color: #eef0ff !important;
-    border: 1px solid rgba(255,255,255,0.14) !important;
+    background: rgba(255,255,255,0.06); 
+    color: var(--rx-text);
+    border: 1px solid rgba(255,255,255,0.18);
     box-shadow: 0 10px 26px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.06);
-    line-height: 1.55;
+    line-height: 1.5;
     word-wrap: break-word;
     white-space: pre-wrap;
     font-size: 0.975rem;
@@ -207,36 +188,23 @@ st.markdown(
   .rx-left  { text-align: left; }
   .rx-left  .rx-bubble {
     border-radius: 18px 18px 18px 6px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
   }
+
   .rx-right { text-align: right; }
   .rx-right .rx-bubble {
-    color: #ffffff !important;
-    background: linear-gradient(135deg, var(--rx-indigo) 0%, var(--rx-sky) 100%) !important;
-    border: 1px solid rgba(255,255,255,0.25) !important;
+    color: #ffffff;
+    background: linear-gradient(135deg, var(--rx-indigo) 0%, var(--rx-sky) 100%);
+    border: 1px solid rgba(255,255,255,0.25);
     box-shadow: 0 14px 30px rgba(79,70,229,0.40), inset 0 1px 0 rgba(255,255,255,0.22);
     border-radius: 18px 18px 6px 18px;
   }
   .rx-bubble:hover { transform: translateY(-1px); }
 
-  /* Tables & code blocks */
-  table { border-collapse: separate; border-spacing: 0; width: 100%; }
-  table, th, td { border: 1px solid var(--rx-border) !important; }
-  th, td { padding: .6rem .75rem !important; }
-  th { background: rgba(0,0,0,0.55) !important; color: var(--rx-text) !important; }
-  td { background: rgba(0,0,0,0.35) !important; }
-  pre, code {
-    background: rgba(0,0,0,0.55) !important;
-    border: 1px solid var(--rx-border) !important;
-    border-radius: 10px !important;
-  }
-
-  /* Tabs / Expanders */
-  .stTabs [data-baseweb="tab-list"] { border-bottom: 1px solid var(--rx-border) !important; }
-  .stTabs button[role="tab"] { color: var(--rx-text-dim) !important; }
-  .stTabs button[role="tab"][aria-selected="true"] { color: var(--rx-white) !important; }
-
   /* Form submit alignment tweaks */
-  form[data-testid="stForm"] .stFormSubmitButton { padding-top: 0.25rem; }
+  form[data-testid="stForm"] .stFormSubmitButton {
+    padding-top: 0.25rem;
+  }
 
   /* Scrollbar */
   ::-webkit-scrollbar { width: 12px; height: 12px; }
@@ -250,19 +218,13 @@ st.markdown(
 
   /* Footer watermark */
   .rx-footer {
-    color: var(--rx-text-dim) !important;
+    color: var(--rx-text-dim);
     font-size: 12.75px;
     text-align: center;
     margin-top: 28px;
     opacity: .9;
   }
-
-  /* Respect system dark preference (optional) */
-  @media (prefers-color-scheme: dark) {
-    :root { color-scheme: dark; }
-  }
 </style>
-
 
     """,
     unsafe_allow_html=True,
