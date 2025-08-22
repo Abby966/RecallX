@@ -206,6 +206,33 @@ div[data-baseweb="input"] input::placeholder {
     margin-top: 28px;
     opacity: .9;
   }
+  [data-testid="stTextInput"] input,
+[data-testid="stTextArea"] textarea,
+div[data-baseweb="input"] input {
+  border-radius: 12px !important;
+  border: 1px solid var(--rx-border) !important;
+  background: rgba(255,255,255,0.06) !important;  /* glassy bg */
+  color: var(--rx-text) !important;               /* use dim-light text, not white */
+  caret-color: var(--rx-text) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+/* Focus style */
+[data-testid="stTextInput"] input:focus,
+[data-testid="stTextArea"] textarea:focus,
+div[data-baseweb="input"] input:focus {
+  border-color: rgba(79,70,229,0.65) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(79,70,229,0.25) !important;
+}
+
+/* Placeholder */
+[data-testid="stTextInput"] input::placeholder,
+[data-testid="stTextArea"] textarea::placeholder,
+div[data-baseweb="input"] input::placeholder {
+  color: #9aa3b2 !important;
+  opacity: 1 !important;
+}
 </style>
 
     """,
