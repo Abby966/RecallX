@@ -125,21 +125,43 @@ st.markdown(
   }
 
   /* Inputs */
-  .stTextInput input, .stTextArea textarea {
-    border-radius: 12px !important;
-    border: 1px solid var(--rx-border) !important;
-    background: rgba(255,255,255,0.06) !important;
-    color: var(--rx-white) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
-  }
-  .stTextInput input:focus, .stTextArea textarea:focus {
-    border-color: rgba(79,70,229,0.65) !important;
-    outline: none !important;
-    box-shadow: 0 0 0 3px rgba(79,70,229,0.25) !important;
-  }
-.stTextInput input {
-    color: white !important;
-    background-color: #1e1e1e !important;
+[data-testid="stTextInput"] input,
+[data-testid="stTextArea"] textarea,
+.stTextInput > div > div > input,
+.stTextArea > div > textarea,
+div[data-baseweb="input"] input {
+  border-radius: 12px !important;
+  border: 1px solid rgba(255,255,255,0.18) !important;
+  background: #121417 !important;           /* dark field bg */
+  color: #e7e9ee !important;                 /* input text */
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06) !important;
+  caret-color: #e7e9ee !important;
+}
+
+/* Focus ring */
+[data-testid="stTextInput"] input:focus,
+[data-testid="stTextArea"] textarea:focus,
+.stTextInput > div > div > input:focus,
+.stTextArea > div > textarea:focus,
+div[data-baseweb="input"] input:focus {
+  border-color: rgba(79,70,229,0.85) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(79,70,229,0.28) !important;
+}
+
+/* Placeholder visibility */
+[data-testid="stTextInput"] input::placeholder,
+[data-testid="stTextArea"] textarea::placeholder,
+div[data-baseweb="input"] input::placeholder {
+  color: #9aa3b2 !important;
+  opacity: 1 !important;
+}
+
+/* Chip tags / pills if you use them */
+[data-baseweb="tag"] {
+  background: #1b1f26 !important;
+  color: #e7e9ee !important;
+  border-color: rgba(255,255,255,0.12) !important;
 }
   /* File uploader */
   .rx-uploader {
