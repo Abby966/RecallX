@@ -1,4 +1,4 @@
-
+import httpx
 import os
 import io
 from typing import List
@@ -294,8 +294,15 @@ def llm_answer(provider: str, model: str, api_key: str, question: str, context: 
     )
     user_msg = f"Question: {question}\n\nContext:\n{context}\n"
 
+    # <- NEW: use a client that ignores HTTP(S)_PROXY from the host
+    http_client = httpx.Client(
+        timeout=30.0,
+        follow_redirects=True,
+        trust_env=False,  # <— ignores HTTP_PROXY/HTTPS_PROXY/ALL_PROXY
+    )
+
     if provider == "groq":
-        client = GroqClient(api_key=api_key)
+        client = GroqClient(api_key=api_key, http_client=http_client)
         resp = client.chat.completions.create(
             model=model or "llama-3.1-8b-instant",
             messages=[{"role":"system","content":system_msg},{"role":"user","content":user_msg}],
@@ -304,7 +311,7 @@ def llm_answer(provider: str, model: str, api_key: str, question: str, context: 
         return resp.choices[0].message.content.strip()
 
     if provider == "openai":
-        client = OpenAIClient(api_key=api_key)
+        client = OpenAIClient(api_key=api_key, http_client=http_client)
         resp = client.chat.completions.create(
             model=model or "gpt-4o-mini",
             messages=[{"role":"system","content":system_msg},{"role":"user","content":user_msg}],
@@ -313,7 +320,7 @@ def llm_answer(provider: str, model: str, api_key: str, question: str, context: 
         return resp.choices[0].message.content.strip()
 
     if provider == "deepseek":
-        client = OpenAIClient(api_key=api_key, base_url="https://api.deepseek.com")
+        client = OpenAIClient(api_key=api_key, base_url="https://api.deepseek.com", http_client=http_client)
         resp = client.chat.completions.create(
             model=model or "deepseek-chat",
             messages=[{"role":"system","content":system_msg},{"role":"user","content":user_msg}],
@@ -322,7 +329,6 @@ def llm_answer(provider: str, model: str, api_key: str, question: str, context: 
         return resp.choices[0].message.content.strip()
 
     raise RuntimeError(f"Unknown provider: {provider}")
-
 # --------- Session state ---------
 if "messages" not in st.session_state:
     st.session_state.messages = [
