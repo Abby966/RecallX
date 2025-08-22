@@ -123,15 +123,19 @@ st.markdown(
     color: var(--rx-text) !important;
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
   }
-[data-testid="stTextInput"] input,
-[data-testid="stTextArea"] textarea,
-div[data-baseweb="input"] input {
-  border-radius: 12px !important;
-  border: 1px solid #d0d5dd !important;
-  background: #ffffff !important;    /* light field */
-  color: #111319 !important;         /* dark text */
-  caret-color: #111319 !important;
+[data-testid="stTextInput"] input:focus,
+[data-testid="stTextArea"] textarea:focus,
+div[data-baseweb="input"] input:focus {
+  border-color: rgba(79,70,229,0.85) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(79,70,229,0.28) !important;
 }
+/* Placeholder */
+[data-testid="stTextInput"] input::placeholder,
+[data-testid="stTextArea"] textarea::placeholder,
+div[data-baseweb="input"] input::placeholder {
+  color: #9aa3b2 !important;
+  opacity: 1 !important;
   /* Chips */
   .rx-chip {
     display:inline-flex; align-items:center; gap:8px;
