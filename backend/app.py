@@ -127,10 +127,10 @@ st.markdown(
 [data-testid="stTextArea"] textarea,
 div[data-baseweb="input"] input {
   border-radius: 12px !important;
-  border: 1px solid rgba(255,255,255,0.18) !important;
-  background: #121417 !important;   /* dark field */
-  color: #e7e9ee !important;         /* light text */
-  caret-color: #e7e9ee !important;
+  border: 1px solid #d0d5dd !important;
+  background: #ffffff !important;    /* light field */
+  color: #111319 !important;         /* dark text */
+  caret-color: #111319 !important;
 }
   /* Chips */
   .rx-chip {
