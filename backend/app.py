@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 from groq import Groq as GroqClient
 from openai import OpenAI as OpenAIClient  # also used for DeepSeek via base_url
 
+
 # --------- ENV / Defaults ---------
 load_dotenv()
 EMBED_MODEL = os.getenv("EMBED_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
@@ -136,7 +137,10 @@ st.markdown(
     outline: none !important;
     box-shadow: 0 0 0 3px rgba(79,70,229,0.25) !important;
   }
-
+.stTextInput input {
+    color: white !important;
+    background-color: #1e1e1e !important;
+}
   /* File uploader */
   .rx-uploader {
     border: 1px dashed rgba(255,255,255,0.28);
