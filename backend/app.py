@@ -123,21 +123,15 @@ st.markdown(
     color: var(--rx-text) !important;
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
   }
-/* Inputs */
-  .stTextInput input, .stTextArea textarea {
-    border-radius: 12px !important;
-    border: 1px solid var(--rx-border) !important;
-    background: rgba(255,255,255,0.06) !important;
-    color: var(--rx-white) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
-  }
-  .stTextInput input:focus, .stTextArea textarea:focus {
-    border-color: rgba(79,70,229,0.65) !important;
-    outline: none !important;
-    box-shadow: 0 0 0 3px rgba(79,70,229,0.25) !important;
-  }
-
-
+[data-testid="stTextInput"] input,
+[data-testid="stTextArea"] textarea,
+div[data-baseweb="input"] input {
+  border-radius: 12px !important;
+  border: 1px solid rgba(255,255,255,0.18) !important;
+  background: #121417 !important;   /* dark field */
+  color: #e7e9ee !important;         /* light text */
+  caret-color: #e7e9ee !important;
+}
   /* Chips */
   .rx-chip {
     display:inline-flex; align-items:center; gap:8px;
