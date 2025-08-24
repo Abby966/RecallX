@@ -9,21 +9,16 @@ from pypdf import PdfReader
 from dotenv import load_dotenv
 
 # Providers
-import os
-from dotenv import load_dotenv
 from groq import Groq as GroqClient
-from openai import OpenAI as OpenAIClient  # also works for DeepSeek if you set base_url
+from openai import OpenAI as OpenAIClient  # also used for DeepSeek via base_url
 
 # --------- ENV / Defaults ---------
 load_dotenv()
-
 EMBED_MODEL = os.getenv("EMBED_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
 DEFAULT_PROVIDER = (os.getenv("LLM_PROVIDER", "groq") or "groq").lower()  # groq | openai | deepseek
 DEFAULT_MODEL = os.getenv("LLM_MODEL", "llama-3.1-8b-instant")
 SHOW_SETTINGS_DEFAULT = os.getenv("SHOW_SETTINGS", "0") == "1"  # sidebar hidden by default
 
-# --------- Client initialization ---------
-groq_client = GroqClient(api_key=os.getenv("GROQ_API_KEY"))  
 # --------- Page config ---------
 st.set_page_config(
     page_title="RecallX",
@@ -129,22 +124,18 @@ st.markdown(
   }
 
   /* Inputs */
-    /* Inputs */
   .stTextInput input, .stTextArea textarea {
     border-radius: 12px !important;
     border: 1px solid var(--rx-border) !important;
-    background: rgba(255,255,255,0.95) !important; /* lighter background */
-    color: #000000 !important; /* black text for visibility */
+    background: rgba(255,255,255,0.06) !important;
+    color: var(--rx-white) !important;
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
   }
   .stTextInput input:focus, .stTextArea textarea:focus {
     border-color: rgba(79,70,229,0.65) !important;
     outline: none !important;
     box-shadow: 0 0 0 3px rgba(79,70,229,0.25) !important;
-    background: #ffffff !important; /* ensure stays white on focus */
-    color: #000000 !important;      /* keep black text */
   }
-
 
   /* File uploader */
   .rx-uploader {
