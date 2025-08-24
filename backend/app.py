@@ -9,16 +9,21 @@ from pypdf import PdfReader
 from dotenv import load_dotenv
 
 # Providers
+import os
+from dotenv import load_dotenv
 from groq import Groq as GroqClient
-from openai import OpenAI as OpenAIClient  # also used for DeepSeek via base_url
+from openai import OpenAI as OpenAIClient  # also works for DeepSeek if you set base_url
 
 # --------- ENV / Defaults ---------
 load_dotenv()
+
 EMBED_MODEL = os.getenv("EMBED_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
 DEFAULT_PROVIDER = (os.getenv("LLM_PROVIDER", "groq") or "groq").lower()  # groq | openai | deepseek
 DEFAULT_MODEL = os.getenv("LLM_MODEL", "llama-3.1-8b-instant")
 SHOW_SETTINGS_DEFAULT = os.getenv("SHOW_SETTINGS", "0") == "1"  # sidebar hidden by default
 
+# --------- Client initialization ---------
+groq_client = GroqClient(api_key=os.getenv("GROQ_API_KEY"))  
 # --------- Page config ---------
 st.set_page_config(
     page_title="RecallX",
