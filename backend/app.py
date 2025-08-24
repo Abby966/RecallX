@@ -1,4 +1,3 @@
-
 import os
 import io
 from typing import List
@@ -123,18 +122,25 @@ st.markdown(
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
   }
 
-  /* Inputs */
+  /* Inputs — make text always readable on white background */
   .stTextInput input, .stTextArea textarea {
     border-radius: 12px !important;
     border: 1px solid var(--rx-border) !important;
-    background: rgba(255,255,255,0.06) !important;
-    color: var(--rx-white) !important;
+    background: #ffffff !important;       /* ensure white field */
+    color: #000000 !important;             /* black text for visibility */
+    caret-color: #000000 !important;       /* black caret */
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+  .stTextInput input::placeholder, .stTextArea textarea::placeholder {
+    color: #333333 !important;             /* darker placeholder so it's visible */
+    opacity: 0.8 !important;
   }
   .stTextInput input:focus, .stTextArea textarea:focus {
     border-color: rgba(79,70,229,0.65) !important;
     outline: none !important;
     box-shadow: 0 0 0 3px rgba(79,70,229,0.25) !important;
+    background: #ffffff !important;        /* keep white on focus */
+    color: #000000 !important;             /* keep black text */
   }
 
   /* File uploader */
@@ -277,7 +283,7 @@ def chunk_text(text: str, max_chars: int = 1000, overlap: int = 150) -> List[str
     for i, c in enumerate(chunks):
         if i == 0: final.append(c)
         else:
-            tail = final[-1][-overlap:] if overlap > 0 else ""
+            tail = final[-overlap:] if overlap > 0 else ""
             final.append((tail + " " + c).strip())
     return final
 
