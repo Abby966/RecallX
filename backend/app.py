@@ -124,18 +124,22 @@ st.markdown(
   }
 
   /* Inputs */
+    /* Inputs */
   .stTextInput input, .stTextArea textarea {
     border-radius: 12px !important;
     border: 1px solid var(--rx-border) !important;
-    background: rgba(255,255,255,0.06) !important;
-    color: var(--rx-white) !important;
+    background: rgba(255,255,255,0.95) !important; /* lighter background */
+    color: #000000 !important; /* black text for visibility */
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
   }
   .stTextInput input:focus, .stTextArea textarea:focus {
     border-color: rgba(79,70,229,0.65) !important;
     outline: none !important;
     box-shadow: 0 0 0 3px rgba(79,70,229,0.25) !important;
+    background: #ffffff !important; /* ensure stays white on focus */
+    color: #000000 !important;      /* keep black text */
   }
+
 
   /* File uploader */
   .rx-uploader {
