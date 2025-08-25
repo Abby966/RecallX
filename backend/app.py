@@ -9,8 +9,14 @@ from pypdf import PdfReader
 from dotenv import load_dotenv
 
 # Providers
-from groq import Groq as GroqClient
-from openai import OpenAI as OpenAIClient  # also used for DeepSeek via base_url
+# OpenAI
+from openai import OpenAI
+openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+# Groq
+from groq import Groq
+groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+ # also used for DeepSeek via base_url
 
 # --------- ENV / Defaults ---------
 load_dotenv()
