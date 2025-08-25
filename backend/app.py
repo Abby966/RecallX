@@ -10,8 +10,6 @@ from dotenv import load_dotenv
 
 # Providers
 # OpenAI
-from openai import OpenAI
-openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Groq
 from groq import Groq
