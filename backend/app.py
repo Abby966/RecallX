@@ -1,4 +1,3 @@
-
 import os
 import io
 from typing import List
@@ -8,19 +7,13 @@ from sentence_transformers import SentenceTransformer
 from pypdf import PdfReader
 from dotenv import load_dotenv
 
-# Providers
-# OpenAI
-
-# Groq
+# Groq only
 from groq import Groq
-groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
- # also used for DeepSeek via base_url
 
 # --------- ENV / Defaults ---------
 load_dotenv()
 EMBED_MODEL = os.getenv("EMBED_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
-DEFAULT_PROVIDER = (os.getenv("LLM_PROVIDER", "groq") or "groq").lower()  # groq | openai | deepseek
-DEFAULT_MODEL = os.getenv("LLM_MODEL", "llama-3.1-8b-instant")
+DEFAULT_MODEL = os.getenv("LLM_MODEL", "llama-3.1-8b-instant")  # Groq model
 SHOW_SETTINGS_DEFAULT = os.getenv("SHOW_SETTINGS", "0") == "1"  # sidebar hidden by default
 
 # --------- Page config ---------
@@ -234,6 +227,17 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+# --------- Secrets helper ---------
+
+def get_secret(name: str, default: str = "") -> str:
+    """Priority: Streamlit Secrets -> OS env -> default"""
+    try:
+        if hasattr(st, "secrets") and name in st.secrets:
+            return str(st.secrets.get(name, "")).strip()
+    except Exception:
+        pass
+    return (os.getenv(name, default) or "").strip()
+
 # --------- Embeddings / utils ---------
 @st.cache_resource(show_spinner=False)
 def get_model(name: str):
@@ -290,7 +294,9 @@ def top_k_cosine(query_emb: np.ndarray, doc_embs: np.ndarray, k: int = 5) -> Lis
     sims = (doc_embs @ query_emb.reshape(-1,1)).ravel()
     return np.argsort(-sims)[:k].tolist()
 
-def llm_answer(provider: str, model: str, api_key: str, question: str, context: str) -> str:
+# --------- LLM (Groq-only) ---------
+
+def llm_answer(model: str, api_key_ui: str, question: str, context: str) -> str:
     system_msg = (
         "You are a precise assistant. Answer ONLY from the provided context. "
         "If the answer is not in the context, say: 'I couldn’t find this in the document.' "
@@ -298,34 +304,21 @@ def llm_answer(provider: str, model: str, api_key: str, question: str, context: 
     )
     user_msg = f"Question: {question}\n\nContext:\n{context}\n"
 
-    if provider == "groq":
-        client = GroqClient(api_key=api_key)
-        resp = client.chat.completions.create(
-            model=model or "llama-3.1-8b-instant",
-            messages=[{"role":"system","content":system_msg},{"role":"user","content":user_msg}],
-            temperature=0.2, max_tokens=350
-        )
-        return resp.choices[0].message.content.strip()
+    key = (api_key_ui or get_secret("GROQ_API_KEY", "")).strip()
+    if not key:
+        raise RuntimeError("Missing GROQ_API_KEY. Add it in Streamlit Secrets (or open Settings and paste it).")
 
-    if provider == "openai":
-        client = OpenAIClient(api_key=api_key)
-        resp = client.chat.completions.create(
-            model=model or "gpt-4o-mini",
-            messages=[{"role":"system","content":system_msg},{"role":"user","content":user_msg}],
-            temperature=0.2, max_tokens=350
-        )
-        return resp.choices[0].message.content.strip()
-
-    if provider == "deepseek":
-        client = OpenAIClient(api_key=api_key, base_url="https://api.deepseek.com")
-        resp = client.chat.completions.create(
-            model=model or "deepseek-chat",
-            messages=[{"role":"system","content":system_msg},{"role":"user","content":user_msg}],
-            temperature=0.2, max_tokens=350
-        )
-        return resp.choices[0].message.content.strip()
-
-    raise RuntimeError(f"Unknown provider: {provider}")
+    client = Groq(api_key=key)  # build lazily
+    resp = client.chat.completions.create(
+        model=model or "llama-3.1-8b-instant",
+        messages=[
+            {"role": "system", "content": system_msg},
+            {"role": "user", "content": user_msg},
+        ],
+        temperature=0.2,
+        max_tokens=350,
+    )
+    return resp.choices[0].message.content.strip()
 
 # --------- Session state ---------
 if "messages" not in st.session_state:
@@ -350,30 +343,25 @@ with c1:
 with c2:
     col_a, col_b = st.columns([0.7,0.3])
     with col_b:
-        if st.button("⚙️ Settings", key="toggle_settings", help="Show/hide provider & API key", type="secondary"):
+        if st.button("⚙️ Settings", key="toggle_settings", help="Show/hide model & API key", type="secondary"):
             st.session_state.show_settings = not st.session_state.show_settings
 st.markdown('</div>', unsafe_allow_html=True)
 
-# --------- Settings (hidden by default; toggle to show) ---------
+# --------- Settings (Groq-only) ---------
 if st.session_state.show_settings:
     with st.sidebar:
-        st.markdown("### ⚙️ Settings")
-        provider = st.selectbox("Provider", ["groq","openai","deepseek"],
-                                index=["groq","openai","deepseek"].index(DEFAULT_PROVIDER))
-        default_model = "llama-3.1-8b-instant" if provider=="groq" else ("gpt-4o-mini" if provider=="openai" else "deepseek-chat")
-        model = st.text_input("Model", value=os.getenv("LLM_MODEL", default_model))
-        key_env = {"groq":"GROQ_API_KEY","openai":"OPENAI_API_KEY","deepseek":"DEEPSEEK_API_KEY"}[provider]
-        api_key = st.text_input(key_env, value=os.getenv(key_env, ""), type="password")
+        st.markdown("### ⚙️ Settings (Groq)")
+        model = st.text_input("Model", value=DEFAULT_MODEL)
+        api_key_ui = st.text_input("GROQ_API_KEY", value=get_secret("GROQ_API_KEY", ""), type="password")
+        st.caption(f"Groq key detected: {'✅' if bool(api_key_ui or get_secret('GROQ_API_KEY')) else '❌'}")
         if st.button("Clear memory"):
             st.session_state.chunks = []
             st.session_state.embs = np.empty((0,384), dtype=np.float32)
             st.session_state.sources = []
             st.session_state.messages = [{"role":"assistant","content":"Welcome to RecallX — drop a file and ask anything about it."}]
 else:
-    provider = DEFAULT_PROVIDER
-    model = os.getenv("LLM_MODEL", DEFAULT_MODEL)
-    env_map = {"groq":"GROQ_API_KEY","openai":"OPENAI_API_KEY","deepseek":"DEEPSEEK_API_KEY"}
-    api_key = os.getenv(env_map[provider], "")
+    model = DEFAULT_MODEL
+    api_key_ui = ""  # hidden mode; llm_answer will pull from st.secrets
 
 # --------- Uploader (MULTI-FILE) ---------
 st.markdown('<div class="rx-card">', unsafe_allow_html=True)
@@ -449,9 +437,7 @@ if submitted and user_q:
         context = "\n\n".join(pieces)
 
         try:
-            if not api_key:
-                raise RuntimeError("Missing API key. (Open settings or set env vars.)")
-            out = llm_answer(provider, model, api_key, user_q, context)
+            out = llm_answer(model, api_key_ui, user_q, context)
         except Exception as e:
             preview = "\n".join(context.splitlines()[:8])
             out = f"(Fallback: {e})\n\n{preview or 'No context available.'}"
