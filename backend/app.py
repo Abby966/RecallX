@@ -1,3 +1,6 @@
+import sys, groq, httpx, os
+st.write({"python": sys.executable, "groq": groq.__version__, "httpx": httpx.__version__,
+          "HTTP_PROXY": os.getenv("HTTP_PROXY"), "HTTPS_PROXY": os.getenv("HTTPS_PROXY")})
 import httpx
 import os
 import io
