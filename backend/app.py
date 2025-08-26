@@ -306,10 +306,8 @@ def top_k_cosine(query_emb: np.ndarray, doc_embs: np.ndarray, k: int = 5) -> Lis
     return np.argsort(-sims)[:k].tolist()
 
 # --------- No-proxy HTTP client ---------
-def make_http_client_no_proxy() -> httpx.Client:
-    # Force NO proxy regardless of env; prevents hidden `proxies=` issues
-    return httpx.Client(timeout=60)
-
+def make_http_client_no_proxy():
+    return httpx.Client(timeout=60, trust_env=False)
 # --------- LLM answer ---------
 def llm_answer(provider: str, model: str, api_key: str, question: str, context: str) -> str:
     system_msg = (
@@ -478,7 +476,8 @@ if submitted and user_q:
             out = f"(Fallback: {e})\n\n{preview or 'No context available.'}"
 
     st.session_state.messages.append({"role":"assistant","content":out})
-    st.experimental_rerun()  # refresh to render new bubbles below
+    st.rerun()
+    # refresh to render new bubbles below
 
 # --------- Chat timeline (BOTTOM) ---------
 chat_box = st.container()
