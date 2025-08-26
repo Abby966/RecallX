@@ -1,4 +1,4 @@
-
+import httpx
 import os
 import io
 from typing import List
@@ -285,7 +285,9 @@ def top_k_cosine(query_emb: np.ndarray, doc_embs: np.ndarray, k: int = 5) -> Lis
     if doc_embs.shape[0] == 0: return []
     sims = (doc_embs @ query_emb.reshape(-1,1)).ravel()
     return np.argsort(-sims)[:k].tolist()
-
+def make_http_client_no_proxy():
+    # Force NO proxy regardless of env; prevents hidden `proxies=` issues
+    return httpx.Client(timeout=60)
 def llm_answer(provider: str, model: str, api_key: str, question: str, context: str) -> str:
     system_msg = (
         "You are a precise assistant. Answer ONLY from the provided context. "
@@ -295,7 +297,7 @@ def llm_answer(provider: str, model: str, api_key: str, question: str, context: 
     user_msg = f"Question: {question}\n\nContext:\n{context}\n"
 
     if provider == "groq":
-        client = GroqClient(api_key=api_key)
+        client = Groq(api_key=key, http_client=make_http_client_no_proxy())
         resp = client.chat.completions.create(
             model=model or "llama-3.1-8b-instant",
             messages=[{"role":"system","content":system_msg},{"role":"user","content":user_msg}],
