@@ -29,12 +29,6 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# (Optional) one-time debug — remove later if you want
-st.write({
-    "python": sys.executable,
-    "HTTP_PROXY": os.getenv("HTTP_PROXY"),
-    "HTTPS_PROXY": os.getenv("HTTPS_PROXY"),
-})
 
 # --------- Light theme (white + blue) + chat bubbles ---------
 st.markdown(
