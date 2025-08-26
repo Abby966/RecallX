@@ -131,7 +131,7 @@ st.markdown(
     border-radius: 12px !important;
     border: 1px solid var(--rx-border) !important;
     background: rgba(255,255,255,0.06) !important;
-    color: var(--rx-white) !important;
+   color: #000000 !important;   /* black text */
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
   }
   .stTextInput input:focus, .stTextArea textarea:focus {
