@@ -1,11 +1,10 @@
-import sys, groq, httpx, os
-st.write({"python": sys.executable, "groq": groq.__version__, "httpx": httpx.__version__,
-          "HTTP_PROXY": os.getenv("HTTP_PROXY"), "HTTPS_PROXY": os.getenv("HTTPS_PROXY")})
-import httpx
 import os
 import io
+import sys
 from typing import List
+
 import numpy as np
+import httpx
 import streamlit as st
 from sentence_transformers import SentenceTransformer
 from pypdf import PdfReader
@@ -30,6 +29,13 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
+# (Optional) one-time debug — remove later if you want
+st.write({
+    "python": sys.executable,
+    "HTTP_PROXY": os.getenv("HTTP_PROXY"),
+    "HTTPS_PROXY": os.getenv("HTTPS_PROXY"),
+})
+
 # --------- Light theme (white + blue) + chat bubbles ---------
 st.markdown(
     """
@@ -50,7 +56,7 @@ st.markdown(
     --rx-sky: #0ea5e9;
     --rx-emerald: #10b981;
 
-    --rx-bg: radial-gradient(1200px 600px at 10% -10%, rgba(79,70,229,0.10) 0%, rgba(14,165,233,0.08) 40%, transparent 70%), 
+    --rx-bg: radial-gradient(1200px 600px at 10% -10%, rgba(79,70,229,0.10) 0%, rgba(14,165,233,0.08) 40%, transparent 70%),
              radial-gradient(900px 500px at 110% 10%, rgba(16,185,129,0.12) 0%, transparent 60%),
              #0b1220;
     --rx-surface: rgba(255,255,255,0.06);
@@ -86,8 +92,8 @@ st.markdown(
 
   /* Header title */
   .rx-title {
-    font-weight: 800; 
-    font-size: 2.3rem; 
+    font-weight: 800;
+    font-size: 2.3rem;
     letter-spacing: -0.02em;
     color: var(--rx-white);
     margin-bottom: 4px;
@@ -109,7 +115,7 @@ st.markdown(
     box-shadow: 0 8px 24px rgba(79,70,229,0.35), inset 0 1px 0 rgba(255,255,255,0.12);
     transition: transform .06s ease, box-shadow .2s ease, filter .2s ease;
   }
-  .stButton > button:hover { 
+  .stButton > button:hover {
     transform: translateY(-1px);
     box-shadow: 0 12px 26px rgba(79,70,229,0.45), inset 0 1px 0 rgba(255,255,255,0.18);
     filter: saturate(1.05);
@@ -163,7 +169,7 @@ st.markdown(
     background: rgba(79,70,229,0.15);
     border: 1px solid rgba(79,70,229,0.35);
     color: #cdd2ff;
-    padding: 6px 10px; border-radius: 999px; 
+    padding: 6px 10px; border-radius: 999px;
     font-size: 12.5px; margin: 6px 6px 0 0;
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
   }
@@ -178,7 +184,7 @@ st.markdown(
     padding: 12px 14px;
     border-radius: 18px;
     max-width: 78%;
-    background: rgba(255,255,255,0.06); 
+    background: rgba(255,255,255,0.06);
     color: var(--rx-text);
     border: 1px solid rgba(255,255,255,0.18);
     box-shadow: 0 10px 26px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.06);
@@ -232,6 +238,16 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
+
+# --------- Secrets/helper ---------
+def get_secret(name: str, default: str = "") -> str:
+    """Priority: Streamlit Secrets -> OS env -> default"""
+    try:
+        if hasattr(st, "secrets") and name in st.secrets:
+            return str(st.secrets.get(name, "")).strip()
+    except Exception:
+        pass
+    return (os.getenv(name, default) or "").strip()
 
 # --------- Embeddings / utils ---------
 @st.cache_resource(show_spinner=False)
@@ -288,9 +304,13 @@ def top_k_cosine(query_emb: np.ndarray, doc_embs: np.ndarray, k: int = 5) -> Lis
     if doc_embs.shape[0] == 0: return []
     sims = (doc_embs @ query_emb.reshape(-1,1)).ravel()
     return np.argsort(-sims)[:k].tolist()
-def make_http_client_no_proxy():
+
+# --------- No-proxy HTTP client ---------
+def make_http_client_no_proxy() -> httpx.Client:
     # Force NO proxy regardless of env; prevents hidden `proxies=` issues
     return httpx.Client(timeout=60)
+
+# --------- LLM answer ---------
 def llm_answer(provider: str, model: str, api_key: str, question: str, context: str) -> str:
     system_msg = (
         "You are a precise assistant. Answer ONLY from the provided context. "
@@ -300,7 +320,7 @@ def llm_answer(provider: str, model: str, api_key: str, question: str, context: 
     user_msg = f"Question: {question}\n\nContext:\n{context}\n"
 
     if provider == "groq":
-        client = Groq(api_key=key, http_client=make_http_client_no_proxy())
+        client = GroqClient(api_key=api_key, http_client=make_http_client_no_proxy())
         resp = client.chat.completions.create(
             model=model or "llama-3.1-8b-instant",
             messages=[{"role":"system","content":system_msg},{"role":"user","content":user_msg}],
