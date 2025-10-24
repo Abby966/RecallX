@@ -399,7 +399,7 @@ st.markdown('</div>', unsafe_allow_html=True)
 if uploaded_files:
     # Reset RAG and personal modes before processing files
     st.session_state.chunks = []
-    st.session_state.embs = np.empty((0,384), dtype=np.float3BET)
+    st.session_state.embs = np.empty((0,384), dtype=np.float32)
     st.session_state.sources = []
     st.session_state.personal_responses = {}
     st.session_state.mode = "default"
