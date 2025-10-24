@@ -972,7 +972,7 @@ with chat_box:
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-modify the style make it modern and look beautiful also this is chatbot.py import json
+
 
 
 
