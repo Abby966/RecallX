@@ -9,9 +9,10 @@ from dotenv import load_dotenv
 from groq import Groq as GroqClient
 from openai import OpenAI as OpenAIClient
 import httpx
+init_db()
 load_dotenv()
 st.set_page_config(page_title="RecallX", page_icon="📦", layout="wide")
-init_db()
+
 ping = st.experimental_get_query_params().get("ping")
 if ping:
     st.write("pong")
