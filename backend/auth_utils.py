@@ -1,8 +1,9 @@
-# auth_utils.py
 import sqlite3
 import hashlib
+import os
 
-DB_FILE = "users.db"
+# Use Streamlit Cloud persistent folder
+DB_FILE = os.path.join(os.getcwd(), "users.db")
 
 def init_db():
     conn = sqlite3.connect(DB_FILE)
@@ -20,6 +21,7 @@ def hash_password(password: str) -> str:
     return hashlib.sha256(password.encode()).hexdigest()
 
 def create_user(username: str, password: str) -> bool:
+    init_db()  # Ensure table exists
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
     try:
@@ -33,6 +35,7 @@ def create_user(username: str, password: str) -> bool:
         conn.close()
 
 def authenticate(username: str, password: str) -> bool:
+    init_db()  # Ensure table exists
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
     c.execute("SELECT password FROM users WHERE username = ?", (username,))
