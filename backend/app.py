@@ -28,7 +28,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# --- INJECTED CSS STYLES (Unchanged) ---
+# --- INJECTED CSS STYLES (Adjusted to be Minimalist and functional) ---
 st.markdown(
     """
     <style>
@@ -327,19 +327,6 @@ def llm_answer(provider: str, model: str, api_key: str, question: str, context: 
         "Be concise and clear. Include key facts, not speculation."
     )
     user_msg = f"Question: {question}\n\nContext:\n{context}\n"
-    
-    # --- ADDED: Perplexity AI Integration ---
-    if provider == "perplexity":
-        # Perplexity AI uses the OpenAI client structure with a custom base URL
-        client = OpenAIClient(api_key=api_key, base_url="https://api.perplexity.ai")
-        resp = client.chat.completions.create(
-            # Use a fast Perplexity model if model is not specified
-            model=model or "llama-3-8b-instruct", 
-            messages=[{"role":"system","content":system_msg},{"role":"user","content":user_msg}],
-            temperature=0.2, max_tokens=350
-        )
-        return resp.choices[0].message.content.strip()
-    # ----------------------------------------
 
     if provider == "groq":
         client = GroqClient(api_key=api_key, http_client=make_http_client_no_proxy())
@@ -417,26 +404,11 @@ st.markdown('---') # Minimal visual separator
 if st.session_state.show_settings:
     with st.sidebar:
         st.markdown("### ⚙️ LLM Settings")
-        
-        # --- MODIFIED: Added 'perplexity' to the provider list ---
-        providers = ["groq","openai","deepseek", "perplexity"]
-        provider = st.selectbox("Provider", providers,
-                                index=providers.index(DEFAULT_PROVIDER) if DEFAULT_PROVIDER in providers else 0)
-        
-        # --- MODIFIED: Updated default model suggestion and API key map for Perplexity ---
-        if provider == "groq":
-            default_model = "llama-3.1-8b-instant"
-        elif provider == "openai":
-            default_model = "gpt-4o-mini"
-        elif provider == "deepseek":
-            default_model = "deepseek-chat"
-        elif provider == "perplexity":
-            default_model = "llama-3-8b-instruct" # Perplexity's fast, common model
-            
+        provider = st.selectbox("Provider", ["groq","openai","deepseek"],
+                                index=["groq","openai","deepseek"].index(DEFAULT_PROVIDER))
+        default_model = "llama-3.1-8b-instant" if provider=="groq" else ("gpt-4o-mini" if provider=="openai" else "deepseek-chat")
         model = st.text_input("Model", value=os.getenv("LLM_MODEL", default_model))
-        
-        key_env_map = {"groq":"GROQ_API_KEY", "openai":"OPENAI_API_KEY", "deepseek":"DEEPSEEK_API_KEY", "perplexity": "PERPLEXITY_API_KEY"}
-        key_env = key_env_map[provider]
+        key_env = {"groq":"GROQ_API_KEY","openai":"OPENAI_API_KEY","deepseek":"DEEPSEEK_API_KEY"}[provider]
         api_key = st.text_input(key_env, value=os.getenv(key_env, ""), type="password")
         
         st.markdown("---")
@@ -454,8 +426,8 @@ else:
     # Non-visible API key assignment is crucial for the chatbot to work when settings are hidden
     provider = DEFAULT_PROVIDER
     model = os.getenv("LLM_MODEL", DEFAULT_MODEL)
-    env_map = {"groq":"GROQ_API_KEY","openai":"OPENAI_API_KEY","deepseek":"DEEPSEEK_API_KEY", "perplexity": "PERPLEXITY_API_KEY"}
-    api_key = os.getenv(env_map.get(provider, "GROQ_API_KEY"), "") # Use .get for safety
+    env_map = {"groq":"GROQ_API_KEY","openai":"OPENAI_API_KEY","deepseek":"DEEPSEEK_API_KEY"}
+    api_key = os.getenv(env_map[provider], "")
         
 
 # --- MINIMALIST FILE UPLOADER (Back in main area - Logic Maintained) ---
@@ -515,6 +487,10 @@ if uploaded_files:
     
     if st.session_state.mode == "rag":
         st.success(f"Loaded **{len(st.session_state.chunks)}** document chunks for RAG.")
+    
+    # *** BUG FIX: REMOVED st.rerun() HERE. ***
+    # The absence of st.rerun() allows the rest of the script (chat form/display) to execute
+    # immediately after processing the file, preventing the blank screen.
 
 
 # --- INFO CHIPS (Below uploader - Logic Maintained) ---
@@ -598,7 +574,6 @@ if submitted and user_q:
             context = "\n\n".join(pieces)
 
             try:
-                # IMPORTANT: The provider variable is set in the sidebar/else block
                 if not api_key:
                     raise RuntimeError("Missing API key. (Open settings or set env vars.)")
                 out = llm_answer(provider, model, api_key, user_q, context)
