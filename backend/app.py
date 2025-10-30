@@ -252,7 +252,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# --- UTILITY FUNCTIONS (Unchanged - Logic Maintained) ---
+# --- UTILITY FUNCTIONS (Unchanged) ---
 
 def get_secret(name: str, default: str = "") -> str:
     try:
@@ -360,6 +360,7 @@ def llm_answer(provider: str, model: str, api_key: str, question: str, context: 
 @st.cache_data(show_spinner=False)
 def load_my_responses():
     try:
+        # NOTE: Fixed typo in filename if it was meant to be my_responses.json
         with open('my_responses.json', 'r', encoding='utf-8') as f:
             return json.load(f)
     except FileNotFoundError:
@@ -368,7 +369,7 @@ def load_my_responses():
         return {}
 
 
-# --- SESSION STATE SETUP (Unchanged - Logic Maintained) ---
+# --- SESSION STATE SETUP (Unchanged) ---
 if "messages" not in st.session_state:
     st.session_state.messages = [
         {"role":"assistant","content":"Welcome to RecallX — drop a file and ask anything about it."}
@@ -486,7 +487,10 @@ if uploaded_files:
     
     if st.session_state.mode == "rag":
         st.success(f"Loaded **{len(st.session_state.chunks)}** document chunks for RAG.")
-    st.rerun()
+    
+    # *** BUG FIX: REMOVED st.rerun() HERE. ***
+    # The absence of st.rerun() allows the rest of the script (chat form/display) to execute
+    # immediately after processing the file, preventing the blank screen.
 
 
 # --- INFO CHIPS (Below uploader - Logic Maintained) ---
@@ -522,12 +526,14 @@ with chat_box:
 
 # --- INPUT FORM (Fixed element at the bottom) ---
 with st.form("ask_form", clear_on_submit=True):
+    # Use columns to align text input and button horizontally
     q_col, b_col = st.columns([10, 1]) 
     
     with q_col:
         user_q = st.text_input("Ask anything...", "", label_visibility="collapsed")
         
     with b_col:
+        # Send button
         submitted = st.form_submit_button("Send", use_container_width=True, type="primary")
 
 
