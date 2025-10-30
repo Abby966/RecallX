@@ -10,9 +10,7 @@ from dotenv import load_dotenv
 from groq import Groq as GroqClient
 from openai import OpenAI as OpenAIClient
 import httpx
-if os.path.exists("users.db"):
-    os.remove("users.db")
-    print("Old database deleted successfully!")
+=
 ping = st.experimental_get_query_params().get("ping")
 if ping:
     st.write("pong")
