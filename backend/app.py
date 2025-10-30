@@ -20,7 +20,7 @@ DEFAULT_PROVIDER = (os.getenv("LLM_PROVIDER", "groq") or "groq").lower()
 DEFAULT_MODEL = os.getenv("LLM_MODEL", "llama-3.1-8b-instant")
 SHOW_SETTINGS_DEFAULT = os.getenv("SHOW_SETTINGS", "0") == "1"
 
-# --- CONFIGURATION (Keep this for consistency) ---
+# --- CONFIGURATION ---
 st.set_page_config(
     page_title="RecallX",
     page_icon="🧠",
