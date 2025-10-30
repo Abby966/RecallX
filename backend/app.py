@@ -15,6 +15,42 @@ from dotenv import load_dotenv
 from groq import Groq as GroqClient
 from openai import OpenAI as OpenAIClient
 auth_utils.init_db()
+import auth_utils
+
+auth_utils.init_db()
+
+if "user" not in st.session_state:
+    st.session_state.user = None
+
+st.sidebar.markdown("## 🔐 User Login / Signup")
+auth_mode = st.sidebar.radio("Mode", ["Login", "Signup"])
+
+username = st.sidebar.text_input("Username", key="auth_username")
+password = st.sidebar.text_input("Password", type="password", key="auth_password")
+
+if auth_mode == "Signup":
+    if st.sidebar.button("Create Account"):
+        if username and password:
+            success = auth_utils.create_user(username, password)
+            if success:
+                st.success("Account created! Please log in.")
+            else:
+                st.error("Username already exists.")
+        else:
+            st.warning("Enter username and password.")
+
+else:  # Login
+    if st.sidebar.button("Login"):
+        if auth_utils.authenticate(username, password):
+            st.session_state.user = username
+            st.success(f"Logged in as {username}")
+        else:
+            st.error("Invalid credentials")
+
+if not st.session_state.user:
+    st.warning("Please login to access RecallX features.")
+    st.stop()
+
 load_dotenv()
 EMBED_MODEL = os.getenv("EMBED_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
 DEFAULT_PROVIDER = (os.getenv("LLM_PROVIDER", "groq") or "groq").lower()
@@ -536,39 +572,6 @@ with st.form("ask_form", clear_on_submit=True):
     with b_col:
         # Send button
         submitted = st.form_submit_button("Send", use_container_width=True, type="primary")
-# --- LOGIN / SIGNUP ---
-if "user" not in st.session_state:
-    st.session_state.user = None
-
-st.sidebar.markdown("## 🔐 User Login / Signup")
-auth_mode = st.sidebar.radio("Mode", ["Login", "Signup"])
-
-username = st.sidebar.text_input("Username", key="auth_username")
-password = st.sidebar.text_input("Password", type="password", key="auth_password")
-
-if auth_mode == "Signup":
-    if st.sidebar.button("Create Account"):
-        if username and password:
-            success = auth_utils.create_user(username, password)
-            if success:
-                st.success("Account created! Please log in.")
-            else:
-                st.error("Username already exists.")
-        else:
-            st.warning("Enter username and password.")
-
-else:  # Login
-    if st.sidebar.button("Login"):
-        if auth_utils.authenticate(username, password):
-            st.session_state.user = username
-            st.success(f"Logged in as {username}")
-        else:
-            st.error("Invalid credentials")
-
-# Restrict access if not logged in
-if not st.session_state.user:
-    st.warning("Please login to access RecallX features.")
-    st.stop()
 
 # --- ANSWER LOGIC (Unchanged - Logic Maintained) ---
 if submitted and user_q:
