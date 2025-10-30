@@ -28,7 +28,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# --- INJECTED CSS STYLES (Adjusted for Minimalism) ---
+# --- INJECTED CSS STYLES (Adjusted to be Minimalist and functional) ---
 st.markdown(
     """
     <style>
@@ -64,54 +64,54 @@ st.markdown(
     
     /* Center content and limit width for better readability */
     .block-container {
-      padding-top: 2rem !important;
+      padding-top: 1rem !important; /* Minimal top padding */
       padding-bottom: 3rem !important;
-      max-width: 900px !important; /* Minimalist chat width */
+      max-width: 900px !important; 
       margin-left: auto;
       margin-right: auto;
     }
     
-    /* --- REMOVING HEADER/TITLE CARD FROM MAIN VIEW --- */
-    /* Only show the title "RecallX" and "Settings" button in a minimal bar */
+    /* --- HEADER/TITLE BAR (Minimalist) --- */
     .rx-header-container {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 20px;
+        margin-bottom: 5px; /* Less space at the top */
         padding: 0;
     }
     .rx-title {
       font-weight: 700;
-      font-size: 1.5rem; /* Smaller, cleaner title */
+      font-size: 1.5rem; 
       letter-spacing: -0.01em;
       color: var(--rx-white);
-      margin-bottom: 0px;
       text-shadow: 0 1px 0 rgba(0,0,0,0.4);
     }
     .rx-tagline {
-        display: none; /* Hide the tagline in main view for minimalism */
+        display: none; /* Hidden */
     }
 
-    /* --- SIDEBAR STYLES (For moved functionality) --- */
-    [data-testid="stSidebar"] {
-        background: rgba(255,255,255,0.06) !important;
-    }
+    /* --- FILE UPLOADER (Minimalist, only visible when files not loaded) --- */
     .rx-uploader {
-      border: 1px dashed rgba(255,255,255,0.28);
-      border-radius: 14px;
-      padding: 18px;
-      background: rgba(255,255,255,0.05);
+      border: 1px dashed rgba(255,255,255,0.2);
+      border-radius: 12px;
+      padding: 10px; /* Minimal padding */
+      margin-bottom: 20px;
+      background: rgba(255,255,255,0.03);
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
     }
-    .stFileUploader div[data-testid="stFileUploaderDropzone"] {
-      border-radius: 12px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)) !important;
-      border: 1px dashed rgba(255,255,255,0.28) !important;
-    }
+    /* Style the internal text to be smaller */
     .stFileUploader label div[data-testid="stMarkdownContainer"] p {
       color: var(--rx-text-dim) !important;
-      font-weight: 500;
+      font-size: 0.85rem;
       margin-bottom: 0;
+    }
+    .stFileUploader div[data-testid="stFileUploaderDropzone"] {
+      border-radius: 10px;
+      background: rgba(255,255,255,0.01) !important;
+      border: 1px dashed rgba(255,255,255,0.1) !important;
+    }
+    .stFileUploader div[data-testid="stFileUploaderDropzone"] > p {
+        font-size: 0.9rem !important;
     }
 
     /* --- INPUT/FORM STYLES (Fixed at bottom) --- */
@@ -138,7 +138,7 @@ st.markdown(
         position: fixed;
         bottom: 10px;
         width: 100%;
-        max-width: 900px; /* Needs to match .block-container max-width */
+        max-width: 900px;
         transform: translateX(-50%);
         left: 50%;
         z-index: 1000;
@@ -222,7 +222,7 @@ st.markdown(
       border-radius: 20px 20px 20px 4px;
     }
 
-    /* Info Chips (e.g., source files) */
+    /* Info Chips */
     .rx-chip {
       display:inline-flex; align-items:center; gap:8px;
       background: rgba(79,70,229,0.15);
@@ -243,20 +243,16 @@ st.markdown(
         text-align:center; 
         font-size:1.2rem; 
         font-weight:600; 
-        margin:15vh 0; /* Use viewport height for centering on empty screen */
+        margin:15vh 0;
         color: var(--rx-text-dim);
     }
-    
-    /* --- Streamlit overrides for the main chat area --- */
-    .stAlert { margin-top: 15px !important; }
-    [data-testid="stDecoration"] { display: none; } /* Hide the hamburger menu if desired */
     
 </style>
     """,
     unsafe_allow_html=True,
 )
 
-# --- UTILITY FUNCTIONS (Unchanged from previous step) ---
+# --- UTILITY FUNCTIONS (Unchanged - Logic Maintained) ---
 
 def get_secret(name: str, default: str = "") -> str:
     try:
@@ -367,14 +363,12 @@ def load_my_responses():
         with open('my_responses.json', 'r', encoding='utf-8') as f:
             return json.load(f)
     except FileNotFoundError:
-        # Do not use st.error here, as it breaks the minimalist design
         return {}
     except json.JSONDecodeError:
-        # Do not use st.error here, as it breaks the minimalist design
         return {}
 
 
-# --- SESSION STATE SETUP (Unchanged) ---
+# --- SESSION STATE SETUP (Unchanged - Logic Maintained) ---
 if "messages" not in st.session_state:
     st.session_state.messages = [
         {"role":"assistant","content":"Welcome to RecallX — drop a file and ask anything about it."}
@@ -398,57 +392,56 @@ st.markdown('<div class="rx-header-container">', unsafe_allow_html=True)
 st.markdown('<div class="rx-title">RecallX</div>', unsafe_allow_html=True)
 
 # Settings Button (toggles sidebar)
-if st.button("⚙️ Settings", key="toggle_settings", help="Show/hide settings and upload area", type="secondary"):
+if st.button("⚙️ Settings", key="toggle_settings", help="Show/hide LLM settings and data management", type="secondary"):
     st.session_state.show_settings = not st.session_state.show_settings
 
 st.markdown('</div>', unsafe_allow_html=True)
 st.markdown('---') # Minimal visual separator
 
 
-# --- SIDEBAR/SETTINGS (RAG/Personal/API Controls moved here) ---
-with st.sidebar:
-    st.markdown("### ⚙️ Settings")
-    provider = st.selectbox("Provider", ["groq","openai","deepseek"],
-                            index=["groq","openai","deepseek"].index(DEFAULT_PROVIDER))
-    default_model = "llama-3.1-8b-instant" if provider=="groq" else ("gpt-4o-mini" if provider=="openai" else "deepseek-chat")
-    model = st.text_input("Model", value=os.getenv("LLM_MODEL", default_model))
-    key_env = {"groq":"GROQ_API_KEY","openai":"OPENAI_API_KEY","deepseek":"DEEPSEEK_API_KEY"}[provider]
-    api_key = st.text_input(key_env, value=os.getenv(key_env, ""), type="password")
-    
-    st.markdown("---")
-    st.markdown("### 💾 Data Management")
-
-    # --- FILE UPLOADER (Moved to sidebar) ---
-    st.markdown('<div class="rx-uploader">', unsafe_allow_html=True)
-    uploaded_files = st.file_uploader(
-        "Upload PDFs, text files, or your personal response file",
-        type=["pdf", "txt", "json"],
-        accept_multiple_files=True,
-        label_visibility="collapsed",
-        key="sidebar_uploader" # Added key for uniqueness
-    )
-    st.markdown('</div>', unsafe_allow_html=True)
-    
-    if st.button("Clear memory and chat"):
-        st.session_state.chunks = []
-        st.session_state.embs = np.empty((0,384), dtype=np.float32)
-        st.session_state.sources = []
-        st.session_state.messages = [{"role":"assistant","content":"Welcome to RecallX — drop a file and ask anything about it."}]
-        st.session_state.mode = "default"
-        st.session_state.personal_responses = {}
-        st.rerun() # Rerun immediately after clearing
+# --- SIDEBAR/SETTINGS (Only configuration and memory clearing here) ---
+if st.session_state.show_settings:
+    with st.sidebar:
+        st.markdown("### ⚙️ LLM Settings")
+        provider = st.selectbox("Provider", ["groq","openai","deepseek"],
+                                index=["groq","openai","deepseek"].index(DEFAULT_PROVIDER))
+        default_model = "llama-3.1-8b-instant" if provider=="groq" else ("gpt-4o-mini" if provider=="openai" else "deepseek-chat")
+        model = st.text_input("Model", value=os.getenv("LLM_MODEL", default_model))
+        key_env = {"groq":"GROQ_API_KEY","openai":"OPENAI_API_KEY","deepseek":"DEEPSEEK_API_KEY"}[provider]
+        api_key = st.text_input(key_env, value=os.getenv(key_env, ""), type="password")
         
-    # --- NON-VISIBLE API KEY ASSIGNMENT ---
-    # This block ensures API key selection/input is managed even when settings are hidden.
-    if not st.session_state.show_settings:
-        provider = DEFAULT_PROVIDER
-        model = os.getenv("LLM_MODEL", DEFAULT_MODEL)
-        env_map = {"groq":"GROQ_API_KEY","openai":"OPENAI_API_KEY","deepseek":"DEEPSEEK_API_KEY"}
-        api_key = os.getenv(env_map[provider], "")
+        st.markdown("---")
+        st.markdown("### 🗑️ Memory Control")
+
+        if st.button("Clear memory and chat"):
+            st.session_state.chunks = []
+            st.session_state.embs = np.empty((0,384), dtype=np.float32)
+            st.session_state.sources = []
+            st.session_state.messages = [{"role":"assistant","content":"Welcome to RecallX — drop a file and ask anything about it."}]
+            st.session_state.mode = "default"
+            st.session_state.personal_responses = {}
+            st.rerun() 
+else:
+    # Non-visible API key assignment is crucial for the chatbot to work when settings are hidden
+    provider = DEFAULT_PROVIDER
+    model = os.getenv("LLM_MODEL", DEFAULT_MODEL)
+    env_map = {"groq":"GROQ_API_KEY","openai":"OPENAI_API_KEY","deepseek":"DEEPSEEK_API_KEY"}
+    api_key = os.getenv(env_map[provider], "")
         
 
-# --- FILE PROCESSING LOGIC (Triggered by sidebar uploader) ---
-# NOTE: The file processing logic must run *after* the sidebar is defined if `uploaded_files` is to be used.
+# --- MINIMALIST FILE UPLOADER (Back in main area - Logic Maintained) ---
+# This is now the primary element on the main screen, allowing users to start RAG.
+st.markdown('<div class="rx-uploader">', unsafe_allow_html=True)
+uploaded_files = st.file_uploader(
+    "Upload document (PDF, TXT, JSON for personal mode)",
+    type=["pdf", "txt", "json"],
+    accept_multiple_files=True,
+    label_visibility="collapsed",
+)
+st.markdown('</div>', unsafe_allow_html=True)
+
+
+# --- FILE PROCESSING LOGIC (Unchanged - Logic Maintained) ---
 if uploaded_files:
     # Reset RAG and personal modes before processing files
     st.session_state.chunks = []
@@ -465,10 +458,10 @@ if uploaded_files:
             try:
                 st.session_state.personal_responses = json.loads(data.decode("utf-8"))
                 st.session_state.mode = "personal"
-                st.sidebar.success(f"Loaded personal responses from {uploaded.name}!")
+                st.success(f"Loaded personal responses from **{uploaded.name}**! Now in **Personal Mode**.")
                 break 
             except Exception as e:
-                st.sidebar.error(f"Failed to load personal responses from {uploaded.name}: Invalid JSON format. {e}")
+                st.error(f"Failed to load personal responses from {uploaded.name}: Invalid JSON format. {e}")
                 st.session_state.mode = "default"
         else:
             st.session_state.mode = "rag"
@@ -489,14 +482,14 @@ if uploaded_files:
                 st.session_state.chunks.extend(new_chunks)
                 st.session_state.sources.append(uploaded.name)
             else:
-                st.sidebar.error(f"No extractable text found in {uploaded.name}.")
+                st.error(f"No extractable text found in {uploaded.name}.")
     
     if st.session_state.mode == "rag":
-        st.sidebar.success(f"Loaded {len(st.session_state.chunks)} document chunks.")
-    st.rerun() # Rerun to update chat state/chips
+        st.success(f"Loaded **{len(st.session_state.chunks)}** document chunks for RAG.")
+    st.rerun()
 
 
-# --- INFO CHIPS (Below header, kept minimal) ---
+# --- INFO CHIPS (Below uploader - Logic Maintained) ---
 if st.session_state.sources:
     chips = "".join(f"<span class='rx-chip'>📄 {os.path.basename(s)}</span>" for s in st.session_state.sources)
     st.markdown(f"<div>{chips}</div>", unsafe_allow_html=True)
@@ -504,8 +497,7 @@ elif st.session_state.mode == "personal":
     st.markdown(f"<div><span class='rx-chip rx-chip-personal'>🧠 Personal Mode Active</span></div>", unsafe_allow_html=True)
 
 
-# --- INITIAL MESSAGE (Centered on empty screen) ---
-# Only show the centered message if *only* the welcome message exists
+# --- INITIAL MESSAGE (Centered on empty screen - Logic Maintained) ---
 if len(st.session_state.messages) == 1:
     st.markdown(
         f'<div class="welcome-message">{st.session_state.messages[0]["content"]}</div>',
@@ -514,11 +506,9 @@ if len(st.session_state.messages) == 1:
 
 
 # --- CHAT DISPLAY AREA ---
-# Create a container for chat messages, so the input box can be fixed at the bottom.
 chat_box = st.container()
 with chat_box:
     st.markdown('<div class="rx-chat">', unsafe_allow_html=True)
-    # Start loop from 0 if there are more than 1 messages, otherwise, the message is centered (above)
     start_index = 1 if len(st.session_state.messages) > 1 else 0
     for m in st.session_state.messages[start_index:]:
         side = "rx-right" if m["role"] == "user" else "rx-left"
@@ -532,18 +522,16 @@ with chat_box:
 
 # --- INPUT FORM (Fixed element at the bottom) ---
 with st.form("ask_form", clear_on_submit=True):
-    # Use columns to align text input and button horizontally
     q_col, b_col = st.columns([10, 1]) 
     
     with q_col:
         user_q = st.text_input("Ask anything...", "", label_visibility="collapsed")
         
     with b_col:
-        # Send button
         submitted = st.form_submit_button("Send", use_container_width=True, type="primary")
 
 
-# --- ANSWER LOGIC (Unchanged) ---
+# --- ANSWER LOGIC (Unchanged - Logic Maintained) ---
 if submitted and user_q:
     st.session_state.messages.append({"role":"user","content":user_q})
 
