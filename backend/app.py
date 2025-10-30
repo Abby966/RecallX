@@ -20,7 +20,7 @@ DEFAULT_PROVIDER = (os.getenv("LLM_PROVIDER", "groq") or "groq").lower()
 DEFAULT_MODEL = os.getenv("LLM_MODEL", "llama-3.1-8b-instant")
 SHOW_SETTINGS_DEFAULT = os.getenv("SHOW_SETTINGS", "0") == "1"
 
-# --- CONFIGURATION ---
+# --- CONFIGURATION (Keep this for consistency) ---
 st.set_page_config(
     page_title="RecallX",
     page_icon="🧠",
@@ -320,7 +320,6 @@ def top_k_cosine(query_emb: np.ndarray, doc_embs: np.ndarray, k: int = 5) -> Lis
 def make_http_client_no_proxy():
     return httpx.Client(timeout=60, trust_env=False)
 
-# --- LLM ANSWER FUNCTION (UPDATED to include Perplexity) ---
 def llm_answer(provider: str, model: str, api_key: str, question: str, context: str) -> str:
     system_msg = (
         "You are a precise assistant. Answer ONLY from the provided context. "
@@ -356,29 +355,12 @@ def llm_answer(provider: str, model: str, api_key: str, question: str, context: 
         )
         return resp.choices[0].message.content.strip()
 
-    if provider == "perplexity":  # <--- NEW PERPLEXITY INTEGRATION
-        # Simple REST API call for Perplexity (replace PERPLEXITY_API_KEY)
-        url = "https://api.perplexity.ai/v1/ask"
-        headers = {"Authorization": f"Bearer {api_key}"}
-        payload = {
-            "question": question,
-            "context": context,
-            "max_output_tokens": 350
-        }
-        client = make_http_client_no_proxy()
-        try:
-            r = client.post(url, headers=headers, json=payload, timeout=60)
-            r.raise_for_status()
-            data = r.json()
-            return data.get("answer", "No answer returned by Perplexity.")
-        except Exception as e:
-            return f"(Perplexity API error: {e})"
-
     raise RuntimeError(f"Unknown provider: {provider}")
 
 @st.cache_data(show_spinner=False)
 def load_my_responses():
     try:
+        # NOTE: Fixed typo in filename if it was meant to be my_responses.json
         with open('my_responses.json', 'r', encoding='utf-8') as f:
             return json.load(f)
     except FileNotFoundError:
@@ -386,7 +368,8 @@ def load_my_responses():
     except json.JSONDecodeError:
         return {}
 
-# --- SESSION STATE SETUP (unchanged) ---
+
+# --- SESSION STATE SETUP (Unchanged) ---
 if "messages" not in st.session_state:
     st.session_state.messages = [
         {"role":"assistant","content":"Welcome to RecallX — drop a file and ask anything about it."}
@@ -400,38 +383,37 @@ if "sources" not in st.session_state:
 if "show_settings" not in st.session_state:
     st.session_state.show_settings = SHOW_SETTINGS_DEFAULT
 if "mode" not in st.session_state:
-    st.session_state.mode = "default"
+    st.session_state.mode = "default" # default, personal, rag
 if "personal_responses" not in st.session_state:
     st.session_state.personal_responses = {}
 
-# --- REST OF THE APP ---
-# Keep all your existing code exactly as-is (header, uploader, chat, form, RAG logic, etc.)
 
-# --- SETTINGS SIDEBAR ---
-# Update provider selectbox to include Perplexity
+# --- MINIMALIST HEADER BAR ---
+st.markdown('<div class="rx-header-container">', unsafe_allow_html=True)
+st.markdown('<div class="rx-title">RecallX</div>', unsafe_allow_html=True)
+
+# Settings Button (toggles sidebar)
+if st.button("⚙️ Settings", key="toggle_settings", help="Show/hide LLM settings and data management", type="secondary"):
+    st.session_state.show_settings = not st.session_state.show_settings
+
+st.markdown('</div>', unsafe_allow_html=True)
+st.markdown('---') # Minimal visual separator
+
+
+# --- SIDEBAR/SETTINGS (Only configuration and memory clearing here) ---
 if st.session_state.show_settings:
     with st.sidebar:
         st.markdown("### ⚙️ LLM Settings")
-        provider = st.selectbox(
-            "Provider", 
-            ["groq","openai","deepseek","perplexity"],
-            index=["groq","openai","deepseek","perplexity"].index(DEFAULT_PROVIDER) if DEFAULT_PROVIDER in ["groq","openai","deepseek","perplexity"] else 0
-        )
-        default_model = (
-            "llama-3.1-8b-instant" if provider=="groq" else 
-            ("gpt-4o-mini" if provider=="openai" else 
-             ("deepseek-chat" if provider=="deepseek" else "perplexity-default"))
-        )
+        provider = st.selectbox("Provider", ["groq","openai","deepseek"],
+                                index=["groq","openai","deepseek"].index(DEFAULT_PROVIDER))
+        default_model = "llama-3.1-8b-instant" if provider=="groq" else ("gpt-4o-mini" if provider=="openai" else "deepseek-chat")
         model = st.text_input("Model", value=os.getenv("LLM_MODEL", default_model))
-        key_env = {
-            "groq":"GROQ_API_KEY",
-            "openai":"OPENAI_API_KEY",
-            "deepseek":"DEEPSEEK_API_KEY",
-            "perplexity":"PERPLEXITY_API_KEY"  # <-- NEW
-        }[provider]
+        key_env = {"groq":"GROQ_API_KEY","openai":"OPENAI_API_KEY","deepseek":"DEEPSEEK_API_KEY"}[provider]
         api_key = st.text_input(key_env, value=os.getenv(key_env, ""), type="password")
+        
         st.markdown("---")
         st.markdown("### 🗑️ Memory Control")
+
         if st.button("Clear memory and chat"):
             st.session_state.chunks = []
             st.session_state.embs = np.empty((0,384), dtype=np.float32)
@@ -439,21 +421,14 @@ if st.session_state.show_settings:
             st.session_state.messages = [{"role":"assistant","content":"Welcome to RecallX — drop a file and ask anything about it."}]
             st.session_state.mode = "default"
             st.session_state.personal_responses = {}
-            st.rerun()
-else:  # Non-visible API key assignment is crucial for the chatbot to work when settings are hidden
+            st.rerun() 
+else:
+    # Non-visible API key assignment is crucial for the chatbot to work when settings are hidden
     provider = DEFAULT_PROVIDER
     model = os.getenv("LLM_MODEL", DEFAULT_MODEL)
-    
-
-    env_map = {
-        "groq": "GROQ_API_KEY",
-        "openai": "OPENAI_API_KEY",
-        "deepseek": "DEEPSEEK_API_KEY",
-        "perplexity": "PERPLEXITY_API_KEY"  # <-- NEW
-    }
-    
-    api_key = os.getenv(env_map.get(provider, ""), "")
-
+    env_map = {"groq":"GROQ_API_KEY","openai":"OPENAI_API_KEY","deepseek":"DEEPSEEK_API_KEY"}
+    api_key = os.getenv(env_map[provider], "")
+        
 
 # --- MINIMALIST FILE UPLOADER (Back in main area - Logic Maintained) ---
 # This is now the primary element on the main screen, allowing users to start RAG.
@@ -618,3 +593,4 @@ if submitted and user_q:
 
     st.session_state.messages.append({"role":"assistant","content":out})
     st.rerun()
+old
