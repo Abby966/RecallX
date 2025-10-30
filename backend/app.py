@@ -186,4 +186,4 @@ if submitted and user_q:
     st.session_state.messages.append({"role":"user","content":user_q})
     # --- Simple echo for now; can integrate LLM here ---
     st.session_state.messages.append({"role":"assistant","content":f"You asked: {user_q}"})
-   st.rerun()
+    st.rerun()
