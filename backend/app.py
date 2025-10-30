@@ -1,4 +1,4 @@
-modify it import os, io, json
+import os, io, json
 from typing import List
 import numpy as np
 import streamlit as st
@@ -392,4 +392,4 @@ if submitted and user_q:
         context = "\n\n".join(f"[{c['source']}] {c['text']}" for c in selected_chunks)
         answer = llm_answer(DEFAULT_PROVIDER, DEFAULT_MODEL, os.getenv("GROQ_API_KEY",""), user_q, context)
     st.session_state.messages.append({"role":"assistant","content":answer})
-    st.rerun() and give me full correct one please keep the logic before it worked fine
+    st.rerun() 
