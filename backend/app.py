@@ -252,7 +252,74 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# --- LLM ANSWER FUNCTION (Now supports Perplexity) ---
+# --- UTILITY FUNCTIONS (Unchanged) ---
+
+def get_secret(name: str, default: str = "") -> str:
+    try:
+        if hasattr(st, "secrets") and name in st.secrets:
+            return str(st.secrets.get(name, "")).strip()
+    except Exception:
+        pass
+    return (os.getenv(name, default) or "").strip()
+
+@st.cache_resource(show_spinner=False)
+def get_model(name: str):
+    return SentenceTransformer(name, trust_remote_code=True)
+
+def embed_texts(texts: List[str]) -> np.ndarray:
+    model = get_model(EMBED_MODEL)
+    embs = model.encode(texts, normalize_embeddings=True, convert_to_numpy=True)
+    return embs.astype(np.float32)
+
+def read_pdf(file_bytes: bytes) -> str:
+    reader = PdfReader(io.BytesIO(file_bytes))
+    parts = []
+    for page in reader.pages:
+        try:
+            parts.append(page.extract_text() or "")
+        except Exception:
+            parts.append("")
+    return "\n".join(parts)
+
+def read_txt(file_bytes: bytes) -> str:
+    try:
+        return file_bytes.decode("utf-8")
+    except UnicodeDecodeError:
+        return file_bytes.decode("latin-1", errors="ignore")
+
+def chunk_text(text: str, max_chars: int = 1000, overlap: int = 150) -> List[str]:
+    paras = [p.strip() for p in text.split("\n") if p.strip()]
+    chunks, buf = [], ""
+    for p in paras:
+        if len(buf) + len(p) + 1 <= max_chars:
+            buf = (buf + "\n" + p).strip()
+        else:
+            if buf: chunks.append(buf)
+            if len(p) > max_chars:
+                start = 0
+                while start < len(p):
+                    end = min(start + max_chars, len(p))
+                    chunks.append(p[start:end])
+                    start = end - overlap if end < len(p) else end
+            else:
+                buf = p
+    if buf: chunks.append(buf)
+    final = []
+    for i, c in enumerate(chunks):
+        if i == 0: final.append(c)
+        else:
+            tail = final[-1][-overlap:] if overlap > 0 else ""
+            final.append((tail + " " + c).strip())
+    return final
+
+def top_k_cosine(query_emb: np.ndarray, doc_embs: np.ndarray, k: int = 5) -> List[int]:
+    if doc_embs.shape[0] == 0: return []
+    sims = (doc_embs @ query_emb.reshape(-1,1)).ravel()
+    return np.argsort(-sims)[:k].tolist()
+
+def make_http_client_no_proxy():
+    return httpx.Client(timeout=60, trust_env=False)
+
 def llm_answer(provider: str, model: str, api_key: str, question: str, context: str) -> str:
     system_msg = (
         "You are a precise assistant. Answer ONLY from the provided context. "
@@ -260,9 +327,6 @@ def llm_answer(provider: str, model: str, api_key: str, question: str, context: 
         "Be concise and clear. Include key facts, not speculation."
     )
     user_msg = f"Question: {question}\n\nContext:\n{context}\n"
-
-    if not api_key:
-        raise RuntimeError("Missing API key. Set it in environment variables or sidebar settings.")
 
     if provider == "groq":
         client = GroqClient(api_key=api_key, http_client=make_http_client_no_proxy())
@@ -291,18 +355,7 @@ def llm_answer(provider: str, model: str, api_key: str, question: str, context: 
         )
         return resp.choices[0].message.content.strip()
 
-    if provider == "perplexity":
-        # Example using OpenAI client base_url override (depends on Perplexity API spec)
-        client = OpenAIClient(api_key=api_key, base_url="https://api.perplexity.ai")
-        resp = client.chat.completions.create(
-            model=model or "perplexity-chat",
-            messages=[{"role":"system","content":system_msg},{"role":"user","content":user_msg}],
-            temperature=0.2, max_tokens=350
-        )
-        return resp.choices[0].message.content.strip()
-
     raise RuntimeError(f"Unknown provider: {provider}")
-
 
 @st.cache_data(show_spinner=False)
 def load_my_responses():
@@ -539,4 +592,4 @@ if submitted and user_q:
             out = "I'm here to listen. (That trigger isn't defined.)"
 
     st.session_state.messages.append({"role":"assistant","content":out})
-    st.rerun()
+    st.rerun() is the app.py correct according to that
