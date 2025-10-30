@@ -14,7 +14,8 @@ init_db()
 load_dotenv()
 st.set_page_config(page_title="RecallX", page_icon="📦", layout="wide")
 
-ping = st.experimental_get_query_params().get("ping")
+ping = st.query_params.get("ping")
+
 if ping:
     st.write("pong")
     st.stop()  
