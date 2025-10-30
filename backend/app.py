@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 from groq import Groq as GroqClient
 from openai import OpenAI as OpenAIClient
 import httpx
+from auth_utils import init_db  
 init_db()
 load_dotenv()
 st.set_page_config(page_title="RecallX", page_icon="📦", layout="wide")
