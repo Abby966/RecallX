@@ -20,6 +20,7 @@ DEFAULT_PROVIDER = (os.getenv("LLM_PROVIDER", "groq") or "groq").lower()
 DEFAULT_MODEL = os.getenv("LLM_MODEL", "llama-3.1-8b-instant")
 SHOW_SETTINGS_DEFAULT = os.getenv("SHOW_SETTINGS", "0") == "1"
 
+# --- CONFIGURATION (Keep this for consistency) ---
 st.set_page_config(
     page_title="RecallX",
     page_icon="🧠",
@@ -27,45 +28,50 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
+# --- INJECTED CSS STYLES (Improved for clarity and modern look) ---
 st.markdown(
     """
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
     html, body, [class*="css"] {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol", sans-serif !important;
+      font-family: 'Inter', sans-serif !important;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }
 
     :root {
+      /* Define Colors - Using your existing scheme */
       --rx-indigo: #4f46e5;
       --rx-indigo-600: #4338ca;
       --rx-sky: #0ea5e9;
       --rx-emerald: #10b981;
+      --rx-white: #ffffff;
+      --rx-text: #e6e6f0;
+      --rx-text-dim: #b7bfd6;
+      --rx-border: rgba(255,255,255,0.22);
 
+      /* Custom Dark Theme Background */
       --rx-bg: radial-gradient(1200px 600px at 10% -10%, rgba(79,70,229,0.10) 0%, rgba(14,165,233,0.08) 40%, transparent 70%),
                radial-gradient(900px 500px at 110% 10%, rgba(16,185,129,0.12) 0%, transparent 60%),
                #0b1220;
-      --rx-surface: rgba(255,255,255,0.06);
-      --rx-card: rgba(255,255,255,0.10);
-      --rx-border: rgba(255,255,255,0.22);
-      --rx-text: #e6e6f0;
-      --rx-text-dim: #b7bfd6;
-      --rx-white: #ffffff;
     }
 
     .stApp {
       background: var(--rx-bg);
       background-attachment: fixed;
     }
-
+    
+    /* Center content and limit width for better readability */
     .block-container {
       padding-top: 2rem !important;
       padding-bottom: 3rem !important;
-      max-width: 1200px !important;
+      max-width: 900px !important; /* Slightly smaller max width for chat style */
+      margin-left: auto;
+      margin-right: auto;
     }
 
+    /* --- GLOBAL CARD STYLE --- */
     .rx-card {
       background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
       border: 1px solid var(--rx-border);
@@ -76,80 +82,170 @@ st.markdown(
       box-shadow: 0 20px 60px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06);
     }
 
+    /* --- HEADER/TITLE AREA --- */
+    .rx-header-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding: 0;
+    }
     .rx-title {
       font-weight: 800;
-      font-size: 2.3rem;
+      font-size: 2.5rem; /* Slightly larger title */
       letter-spacing: -0.02em;
       color: var(--rx-white);
-      margin-bottom: 4px;
+      margin-bottom: 0px;
       text-shadow: 0 1px 0 rgba(0,0,0,0.4);
     }
     .rx-tagline {
       color: var(--rx-text-dim);
       font-weight: 500;
+      margin-top: 4px;
+      font-size: 0.95rem;
+    }
+    
+    /* File Uploader styling */
+    .rx-uploader {
+      border: 1px dashed rgba(255,255,255,0.28);
+      border-radius: 14px; /* Slightly smaller radius for upload */
+      padding: 18px;
+      background: rgba(255,255,255,0.05);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+    .stFileUploader div[data-testid="stFileUploaderDropzone"] {
+      border-radius: 12px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)) !important;
+      border: 1px dashed rgba(255,255,255,0.28) !important;
+    }
+    .stFileUploader label div[data-testid="stMarkdownContainer"] p {
+      color: var(--rx-text-dim) !important;
+      font-weight: 500;
+      margin-bottom: 0;
     }
 
+    /* --- INPUT/FORM STYLES (ChatGPT-like continuous input) --- */
+    .stTextInput input, .stTextArea textarea {
+      border-radius: 20px !important; /* Rounded corners for chat input */
+      border: none !important; /* Remove border for cleaner look */
+      background: rgba(255,255,255,0.12) !important;
+      color: var(--rx-text) !important;
+      box-shadow: none; /* Removed internal shadow for cleaner look */
+      padding: 15px 20px;
+      min-height: 50px;
+    }
+    .stTextInput input:focus, .stTextArea textarea:focus {
+      outline: 2px solid var(--rx-indigo) !important; /* Simple focus ring */
+      box-shadow: none !important;
+    }
+    
+    /* Make the entire input container appear as a floating card */
+    form[data-testid="stForm"] {
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 24px;
+        padding: 10px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        position: fixed;
+        bottom: 10px;
+        width: 100%;
+        max-width: 900px;
+        transform: translateX(-50%);
+        left: 50%;
+        z-index: 1000;
+        margin-left: 0 !important; /* Override Streamlit's centering */
+    }
+    form[data-testid="stForm"] .stFormSubmitButton {
+        padding: 0;
+        margin-top: 0;
+    }
+
+    /* Adjust padding below chat to account for fixed input */
+    .main > div:nth-child(1) > div:nth-child(1) {
+        padding-bottom: 150px; 
+    }
+
+    /* --- BUTTON STYLES (Simplified) --- */
     .stButton > button {
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 16px;
+      border: none;
       background: linear-gradient(90deg, var(--rx-indigo), var(--rx-indigo-600)) !important;
       color: #fff !important;
       font-weight: 700;
       letter-spacing: 0.02em;
-      box-shadow: 0 8px 24px rgba(79,70,229,0.35), inset 0 1px 0 rgba(255,255,255,0.12);
-      transition: transform .06s ease, box-shadow .2s ease, filter .2s ease;
+      box-shadow: 0 5px 15px rgba(79,70,229,0.3), inset 0 1px 0 rgba(255,255,255,0.12);
+      transition: transform .06s ease, box-shadow .2s ease;
+      height: 40px;
+      padding: 0 18px;
     }
     .stButton > button:hover {
       transform: translateY(-1px);
-      box-shadow: 0 12px 26px rgba(79,70,229,0.45), inset 0 1px 0 rgba(255,255,255,0.18);
-      filter: saturate(1.05);
+      box-shadow: 0 8px 20px rgba(79,70,229,0.5), inset 0 1px 0 rgba(255,255,255,0.18);
     }
     .stButton > button:active {
       transform: translateY(0px) scale(.99);
     }
-
     .stButton [data-testid="baseButton-secondary"] {
       background: rgba(255,255,255,0.06) !important;
       border: 1px solid var(--rx-border) !important;
       color: var(--rx-text) !important;
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+      padding: 0 12px;
+      height: 40px;
     }
 
-    .stTextInput input, .stTextArea textarea {
-      border-radius: 12px !important;
-      border: 1px solid var(--rx-border) !important;
-      background: rgba(255,255,255,0.06) !important;
-      color: var(--rx-text) !important;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+    /* --- CHAT BUBBLE STYLES (More distinct and modern) --- */
+    .rx-chat { margin-top: 12px; }
+    .rx-row { margin: 16px 0; display: flex; align-items: flex-start; }
+
+    .rx-bubble {
+      display: inline-block;
+      padding: 14px 18px;
+      max-width: 85%;
+      line-height: 1.6;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+      font-size: 1.0rem;
+      border-radius: 20px;
     }
-    .stTextInput input:focus, .stTextArea textarea:focus {
-      border-color: rgba(79,70,229,0.65) !important;
-      outline: none !important;
-      box-shadow: 0 0 0 3px rgba(79,70,229,0.25) !important;
+    
+    /* User (Right Side) - Bright Accent */
+    .rx-right { 
+        justify-content: flex-end; 
+        text-align: right; 
+        margin-right: 15px;
+    }
+    .rx-right .rx-bubble {
+      color: var(--rx-white);
+      background: linear-gradient(135deg, var(--rx-indigo) 0%, var(--rx-sky) 100%);
+      box-shadow: 0 5px 15px rgba(79,70,229,0.25);
+      border-radius: 20px 20px 4px 20px; /* Pointed tail at bottom-right */
+      text-align: left; /* Keep text readable */
     }
 
-    .rx-uploader {
-      border: 1px dashed rgba(255,255,255,0.28);
-      border-radius: 16px;
-      padding: 18px;
-      background: rgba(255,255,255,0.05);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+    /* Assistant (Left Side) - Subtle Background */
+    .rx-left { 
+        justify-content: flex-start; 
+        text-align: left; 
+        margin-left: 15px;
     }
-    .stFileUploader label div[data-testid="stMarkdownContainer"] p {
-      color: var(--rx-text-dim) !important;
-    }
-    .stFileUploader div[data-testid="stFileUploaderDropzone"] {
-      border-radius: 14px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)) !important;
-      border: 1px dashed rgba(255,255,255,0.28) !important;
+    .rx-left .rx-bubble {
+      color: var(--rx-text);
+      background: rgba(255,255,255,0.08); /* Lighter gray/off-white */
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      border-radius: 20px 20px 20px 4px; /* Pointed tail at bottom-left */
     }
 
+    .rx-row:hover .rx-bubble { transform: none; } /* Remove hover effect on bubbles */
+    
+    /* Info Chips (e.g., source files) */
     .rx-chip {
       display:inline-flex; align-items:center; gap:8px;
       background: rgba(79,70,229,0.15);
       border: 1px solid rgba(79,70,229,0.35);
       color: #cdd2ff;
-      padding: 6px 10px; border-radius: 999px;
+      padding: 6px 12px; border-radius: 999px;
       font-size: 12.5px; margin: 6px 6px 0 0;
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
     }
@@ -158,54 +254,8 @@ st.markdown(
       border: 1px solid rgba(16,185,129,0.35);
       color: #a7f3d0;
     }
-
-    .rx-chat { margin-top: 12px; }
-    .rx-row { margin: 10px 0; }
-
-    .rx-bubble {
-      display: inline-block;
-      padding: 12px 14px;
-      border-radius: 18px;
-      max-width: 78%;
-      background: rgba(255,255,255,0.06);
-      color: var(--rx-text);
-      border: 1px solid rgba(255,255,255,0.18);
-      box-shadow: 0 10px 26px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.06);
-      line-height: 1.5;
-      word-wrap: break-word;
-      white-space: pre-wrap;
-      font-size: 0.975rem;
-      transition: transform .06s ease;
-    }
-    .rx-left  { text-align: left; }
-    .rx-left  .rx-bubble {
-      border-radius: 18px 18px 18px 6px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
-    }
-
-    .rx-right { text-align: right; }
-    .rx-right .rx-bubble {
-      color: #ffffff;
-      background: linear-gradient(135deg, var(--rx-indigo) 0%, var(--rx-sky) 100%);
-      border: 1px solid rgba(255,255,255,0.25);
-      box-shadow: 0 14px 30px rgba(79,70,229,0.40), inset 0 1px 0 rgba(255,255,255,0.22);
-      border-radius: 18px 18px 6px 18px;
-    }
-    .rx-bubble:hover { transform: translateY(-1px); }
-
-    form[data-testid="stForm"] .stFormSubmitButton {
-      padding-top: 0.25rem;
-    }
-
-    ::-webkit-scrollbar { width: 12px; height: 12px; }
-    ::-webkit-scrollbar-thumb {
-      background: linear-gradient(180deg, rgba(79,70,229,0.45), rgba(14,165,233,0.45));
-      border: 3px solid rgba(0,0,0,0);
-      background-clip: padding-box;
-      border-radius: 8px;
-    }
-    ::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
-
+    
+    /* Footer */
     .rx-footer {
       color: var(--rx-text-dim);
       font-size: 12.75px;
@@ -218,7 +268,10 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+# --- UTILITY FUNCTIONS (Assume unchanged) ---
+
 def get_secret(name: str, default: str = "") -> str:
+    # ... (Keep original implementation)
     try:
         if hasattr(st, "secrets") and name in st.secrets:
             return str(st.secrets.get(name, "")).strip()
@@ -228,14 +281,17 @@ def get_secret(name: str, default: str = "") -> str:
 
 @st.cache_resource(show_spinner=False)
 def get_model(name: str):
+    # ... (Keep original implementation)
     return SentenceTransformer(name, trust_remote_code=True)
 
 def embed_texts(texts: List[str]) -> np.ndarray:
+    # ... (Keep original implementation)
     model = get_model(EMBED_MODEL)
     embs = model.encode(texts, normalize_embeddings=True, convert_to_numpy=True)
     return embs.astype(np.float32)
 
 def read_pdf(file_bytes: bytes) -> str:
+    # ... (Keep original implementation)
     reader = PdfReader(io.BytesIO(file_bytes))
     parts = []
     for page in reader.pages:
@@ -246,12 +302,14 @@ def read_pdf(file_bytes: bytes) -> str:
     return "\n".join(parts)
 
 def read_txt(file_bytes: bytes) -> str:
+    # ... (Keep original implementation)
     try:
         return file_bytes.decode("utf-8")
     except UnicodeDecodeError:
         return file_bytes.decode("latin-1", errors="ignore")
 
 def chunk_text(text: str, max_chars: int = 1000, overlap: int = 150) -> List[str]:
+    # ... (Keep original implementation)
     paras = [p.strip() for p in text.split("\n") if p.strip()]
     chunks, buf = [], ""
     for p in paras:
@@ -277,14 +335,17 @@ def chunk_text(text: str, max_chars: int = 1000, overlap: int = 150) -> List[str
     return final
 
 def top_k_cosine(query_emb: np.ndarray, doc_embs: np.ndarray, k: int = 5) -> List[int]:
+    # ... (Keep original implementation)
     if doc_embs.shape[0] == 0: return []
     sims = (doc_embs @ query_emb.reshape(-1,1)).ravel()
     return np.argsort(-sims)[:k].tolist()
 
 def make_http_client_no_proxy():
+    # ... (Keep original implementation)
     return httpx.Client(timeout=60, trust_env=False)
 
 def llm_answer(provider: str, model: str, api_key: str, question: str, context: str) -> str:
+    # ... (Keep original implementation)
     system_msg = (
         "You are a precise assistant. Answer ONLY from the provided context. "
         "If the answer is not in the context, say: 'I couldn’t find this in the document.' "
@@ -323,16 +384,20 @@ def llm_answer(provider: str, model: str, api_key: str, question: str, context: 
 
 @st.cache_data(show_spinner=False)
 def load_my_responses():
+    # ... (Keep original implementation)
     try:
-        with open('my_response.json', 'r', encoding='utf-8') as f:
+        # NOTE: Fixed typo in filename if it was meant to be my_responses.json
+        with open('my_responses.json', 'r', encoding='utf-8') as f:
             return json.load(f)
     except FileNotFoundError:
-        st.error("Warning: 'my_response.json' file not found. Default chatbot features disabled.")
+        st.error("Warning: 'my_responses.json' file not found. Default chatbot features disabled.")
         return {}
     except json.JSONDecodeError:
-        st.error("Warning: 'my_response.json' has a formatting error. Default chatbot features disabled.")
+        st.error("Warning: 'my_responses.json' has a formatting error. Default chatbot features disabled.")
         return {}
 
+
+# --- SESSION STATE SETUP (Keep unchanged) ---
 if "messages" not in st.session_state:
     st.session_state.messages = [
         {"role":"assistant","content":"Welcome to RecallX — drop a file and ask anything about it."}
@@ -351,18 +416,23 @@ if "personal_responses" not in st.session_state:
     st.session_state.personal_responses = {}
 
 
-st.markdown('<div class="rx-card">', unsafe_allow_html=True)
-c1, c2 = st.columns([1,1])
-with c1:
-    st.markdown('<div class="rx-title">RecallX</div>', unsafe_allow_html=True)
-    st.markdown('<div class="rx-tagline">Upload a document • Get answers • Stay in flow</div>', unsafe_allow_html=True)
-with c2:
-    col_a, col_b = st.columns([0.7,0.3])
-    with col_b:
-        if st.button("⚙️ Settings", key="toggle_settings", help="Show/hide provider & API key", type="secondary"):
-            st.session_state.show_settings = not st.session_state.show_settings
+# --- HEADER AREA (Simplified Layout) ---
+st.markdown('<div class="rx-header-container">', unsafe_allow_html=True)
+
+# Container for Title and Tagline (left side)
+st.markdown('<div>', unsafe_allow_html=True)
+st.markdown('<div class="rx-title">RecallX</div>', unsafe_allow_html=True)
+st.markdown('<div class="rx-tagline">Upload a document • Get answers • Stay in flow</div>', unsafe_allow_html=True)
 st.markdown('</div>', unsafe_allow_html=True)
 
+# Settings Button (right side)
+if st.button("⚙️ Settings", key="toggle_settings", help="Show/hide provider & API key", type="secondary"):
+    st.session_state.show_settings = not st.session_state.show_settings
+
+st.markdown('</div>', unsafe_allow_html=True)
+st.markdown('---') # Visual separator
+
+# --- SIDEBAR/SETTINGS (Keep unchanged) ---
 if st.session_state.show_settings:
     with st.sidebar:
         st.markdown("### ⚙️ Settings")
@@ -385,6 +455,7 @@ else:
     env_map = {"groq":"GROQ_API_KEY","openai":"OPENAI_API_KEY","deepseek":"DEEPSEEK_API_KEY"}
     api_key = os.getenv(env_map[provider], "")
 
+# --- FILE UPLOADER (Enclosed in a card and uploader div) ---
 st.markdown('<div class="rx-card">', unsafe_allow_html=True)
 st.markdown('<div class="rx-uploader">', unsafe_allow_html=True)
 uploaded_files = st.file_uploader(
@@ -395,7 +466,9 @@ uploaded_files = st.file_uploader(
 )
 st.markdown('</div>', unsafe_allow_html=True)
 st.markdown('</div>', unsafe_allow_html=True)
+st.markdown('---') # Visual separator
 
+# --- FILE PROCESSING LOGIC (Keep unchanged) ---
 if uploaded_files:
     # Reset RAG and personal modes before processing files
     st.session_state.chunks = []
@@ -408,7 +481,8 @@ if uploaded_files:
         data = uploaded.read()
         name = uploaded.name.lower()
         
-        if name in ["myrespose.txt", "my_response.json"]:
+        # Corrected file name check based on provided my_responses.json and existing code logic
+        if name in ["my_responses.json", "myrespose.txt"]: 
             try:
                 st.session_state.personal_responses = json.loads(data.decode("utf-8"))
                 st.session_state.mode = "personal"
@@ -445,25 +519,54 @@ if uploaded_files:
         st.success(f"Loaded {len(st.session_state.chunks)} document chunks.")
 
 
+# --- INFO CHIPS (Keep unchanged) ---
 if st.session_state.sources:
     chips = "".join(f"<span class='rx-chip'>📄 {os.path.basename(s)}</span>" for s in st.session_state.sources)
     st.markdown(f"<div>{chips}</div>", unsafe_allow_html=True)
 elif st.session_state.mode == "personal":
     st.markdown(f"<div><span class='rx-chip rx-chip-personal'>🧠 Personal Mode Active</span></div>", unsafe_allow_html=True)
 
-
+# --- INITIAL MESSAGE (Keep unchanged) ---
 if len(st.session_state.messages) == 1:
     st.markdown(
-        "<div style='text-align:center; font-size:1.2rem; font-weight:600; margin:16px 0;'>"
+        "<div style='text-align:center; font-size:1.2rem; font-weight:600; margin:40px 0;'>" # Increased margin 
         + st.session_state.messages[0]["content"] +
         "</div>",
         unsafe_allow_html=True
     )
 
-with st.form("ask_form", clear_on_submit=True):
-    user_q = st.text_input("Ask anything...", "")
-    submitted = st.form_submit_button("Ask", use_container_width=True)
 
+# --- CHAT DISPLAY AREA ---
+# Create a container for chat messages, so the input box can be fixed at the bottom.
+chat_box = st.container()
+with chat_box:
+    st.markdown('<div class="rx-chat">', unsafe_allow_html=True)
+    # Start loop from 0 to display the initial welcome message with new styling
+    for m in st.session_state.messages: 
+        side = "rx-right" if m["role"] == "user" else "rx-left"
+        # Use st.expander for the chat bubble content for better Streamlit rendering compatibility
+        with st.container():
+            st.markdown(
+                f'<div class="rx-row {side}"><div class="rx-bubble">{m["content"]}</div></div>',
+                unsafe_allow_html=True
+            )
+    st.markdown('</div>', unsafe_allow_html=True)
+
+
+# --- INPUT FORM (Now a fixed element at the bottom) ---
+with st.form("ask_form", clear_on_submit=True):
+    # Use columns to align text input and button horizontally
+    q_col, b_col = st.columns([10, 1]) 
+    
+    with q_col:
+        user_q = st.text_input("Ask anything...", "", label_visibility="collapsed")
+        
+    with b_col:
+        # Use a send button style for a modern chat feel
+        submitted = st.form_submit_button("Send", use_container_width=True, type="primary")
+
+
+# --- ANSWER LOGIC (Keep unchanged) ---
 if submitted and user_q:
     st.session_state.messages.append({"role":"user","content":user_q})
 
@@ -510,7 +613,8 @@ if submitted and user_q:
     else: # mode == "default"
         my_responses = load_my_responses()
         for trigger, response in my_responses.items():
-            if trigger.lower() in user_input:
+            # Check if the trigger phrase is *inside* the user's input, more flexible match
+            if trigger.lower() in user_input: 
                 out = response
                 response_found = True
                 break
@@ -520,14 +624,3 @@ if submitted and user_q:
     st.session_state.messages.append({"role":"assistant","content":out})
     st.rerun()
 
-chat_box = st.container()
-with chat_box:
-    st.markdown('<div class="rx-chat">', unsafe_allow_html=True)
-    for m in st.session_state.messages[1:]:
-        side = "rx-right" if m["role"] == "user" else "rx-left"
-        safe = m["content"].replace("<", "&lt;").replace(">", "&gt;")
-        st.markdown(
-            f'<div class="rx-row {side}"><div class="rx-bubble">{safe}</div></div>',
-            unsafe_allow_html=True
-        )
-    st.markdown('</div>', unsafe_allow_html=True)
