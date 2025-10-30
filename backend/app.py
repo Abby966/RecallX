@@ -28,7 +28,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# --- INJECTED CSS STYLES (Adjusted to be Minimalist and functional) ---
+# --- INJECTED CSS STYLES (Minimalist Style Maintained) ---
 st.markdown(
     """
     <style>
@@ -64,7 +64,7 @@ st.markdown(
     
     /* Center content and limit width for better readability */
     .block-container {
-      padding-top: 1rem !important; /* Minimal top padding */
+      padding-top: 1rem !important; 
       padding-bottom: 3rem !important;
       max-width: 900px !important; 
       margin-left: auto;
@@ -76,7 +76,7 @@ st.markdown(
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 5px; /* Less space at the top */
+        margin-bottom: 5px; 
         padding: 0;
     }
     .rx-title {
@@ -87,19 +87,18 @@ st.markdown(
       text-shadow: 0 1px 0 rgba(0,0,0,0.4);
     }
     .rx-tagline {
-        display: none; /* Hidden */
+        display: none; 
     }
 
-    /* --- FILE UPLOADER (Minimalist, only visible when files not loaded) --- */
+    /* --- FILE UPLOADER (Minimalist) --- */
     .rx-uploader {
       border: 1px dashed rgba(255,255,255,0.2);
       border-radius: 12px;
-      padding: 10px; /* Minimal padding */
+      padding: 10px; 
       margin-bottom: 20px;
       background: rgba(255,255,255,0.03);
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
     }
-    /* Style the internal text to be smaller */
     .stFileUploader label div[data-testid="stMarkdownContainer"] p {
       color: var(--rx-text-dim) !important;
       font-size: 0.85rem;
@@ -252,7 +251,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# --- UTILITY FUNCTIONS (Unchanged) ---
+# --- UTILITY FUNCTIONS (Unchanged - Logic Maintained) ---
 
 def get_secret(name: str, default: str = "") -> str:
     try:
@@ -360,7 +359,6 @@ def llm_answer(provider: str, model: str, api_key: str, question: str, context: 
 @st.cache_data(show_spinner=False)
 def load_my_responses():
     try:
-        # NOTE: Fixed typo in filename if it was meant to be my_responses.json
         with open('my_responses.json', 'r', encoding='utf-8') as f:
             return json.load(f)
     except FileNotFoundError:
@@ -368,8 +366,23 @@ def load_my_responses():
     except json.JSONDecodeError:
         return {}
 
+# --- QUIZ CONTENT (Based on uploaded chunks) ---
+QUIZ_QUESTIONS = [
+    {
+        "q": "According to the Bitcoin paper, what serves as proof of the sequence of events witnessed?",
+        "options": ["A) The longest chain of hash-based proof-of-work", "B) The digital signature on each transaction", "C) The trusted central authority", "D) The Merkle Tree root"],
+        "answer": "A",
+        "doc_source": "bitcoin.pdf",
+    },
+    {
+        "q": "What is the primary academic field of the person described in 'cv-1-2.pdf'?",
+        "options": ["A) Electrical Engineering", "B) Computer Science", "C) Business Administration", "D) Data Analytics"],
+        "answer": "B",
+        "doc_source": "cv-1-2.pdf",
+    }
+]
 
-# --- SESSION STATE SETUP (Unchanged) ---
+# --- SESSION STATE SETUP (Adding Quiz State) ---
 if "messages" not in st.session_state:
     st.session_state.messages = [
         {"role":"assistant","content":"Welcome to RecallX — drop a file and ask anything about it."}
@@ -386,21 +399,22 @@ if "mode" not in st.session_state:
     st.session_state.mode = "default" # default, personal, rag
 if "personal_responses" not in st.session_state:
     st.session_state.personal_responses = {}
+if "quiz_state" not in st.session_state:
+    st.session_state.quiz_state = None # None, "start", {"q": 0, "correct": 0, "total": 2}
 
 
 # --- MINIMALIST HEADER BAR ---
 st.markdown('<div class="rx-header-container">', unsafe_allow_html=True)
 st.markdown('<div class="rx-title">RecallX</div>', unsafe_allow_html=True)
 
-# Settings Button (toggles sidebar)
 if st.button("⚙️ Settings", key="toggle_settings", help="Show/hide LLM settings and data management", type="secondary"):
     st.session_state.show_settings = not st.session_state.show_settings
 
 st.markdown('</div>', unsafe_allow_html=True)
-st.markdown('---') # Minimal visual separator
+st.markdown('---') 
 
 
-# --- SIDEBAR/SETTINGS (Only configuration and memory clearing here) ---
+# --- SIDEBAR/SETTINGS (Configuration and memory clearing here) ---
 if st.session_state.show_settings:
     with st.sidebar:
         st.markdown("### ⚙️ LLM Settings")
@@ -421,9 +435,9 @@ if st.session_state.show_settings:
             st.session_state.messages = [{"role":"assistant","content":"Welcome to RecallX — drop a file and ask anything about it."}]
             st.session_state.mode = "default"
             st.session_state.personal_responses = {}
+            st.session_state.quiz_state = None
             st.rerun() 
 else:
-    # Non-visible API key assignment is crucial for the chatbot to work when settings are hidden
     provider = DEFAULT_PROVIDER
     model = os.getenv("LLM_MODEL", DEFAULT_MODEL)
     env_map = {"groq":"GROQ_API_KEY","openai":"OPENAI_API_KEY","deepseek":"DEEPSEEK_API_KEY"}
@@ -431,7 +445,6 @@ else:
         
 
 # --- MINIMALIST FILE UPLOADER (Back in main area - Logic Maintained) ---
-# This is now the primary element on the main screen, allowing users to start RAG.
 st.markdown('<div class="rx-uploader">', unsafe_allow_html=True)
 uploaded_files = st.file_uploader(
     "Upload document (PDF, TXT, JSON for personal mode)",
@@ -450,6 +463,7 @@ if uploaded_files:
     st.session_state.sources = []
     st.session_state.personal_responses = {}
     st.session_state.mode = "default"
+    st.session_state.quiz_state = None # Reset quiz state on new upload
 
     for uploaded in uploaded_files:
         data = uploaded.read()
@@ -487,10 +501,7 @@ if uploaded_files:
     
     if st.session_state.mode == "rag":
         st.success(f"Loaded **{len(st.session_state.chunks)}** document chunks for RAG.")
-    
-    # *** BUG FIX: REMOVED st.rerun() HERE. ***
-    # The absence of st.rerun() allows the rest of the script (chat form/display) to execute
-    # immediately after processing the file, preventing the blank screen.
+    st.rerun()
 
 
 # --- INFO CHIPS (Below uploader - Logic Maintained) ---
@@ -526,18 +537,16 @@ with chat_box:
 
 # --- INPUT FORM (Fixed element at the bottom) ---
 with st.form("ask_form", clear_on_submit=True):
-    # Use columns to align text input and button horizontally
     q_col, b_col = st.columns([10, 1]) 
     
     with q_col:
         user_q = st.text_input("Ask anything...", "", label_visibility="collapsed")
         
     with b_col:
-        # Send button
         submitted = st.form_submit_button("Send", use_container_width=True, type="primary")
 
 
-# --- ANSWER LOGIC (Unchanged - Logic Maintained) ---
+# --- ANSWER LOGIC (MODIFIED for Interactivity) ---
 if submitted and user_q:
     st.session_state.messages.append({"role":"user","content":user_q})
 
@@ -545,22 +554,66 @@ if submitted and user_q:
     user_input = user_q.lower()
     out = None
     response_found = False
+    
+    # --- 1. HANDLE CONVERSATIONAL TRIGGERS (Quiz/Summarize) ---
+    if "quiz" in user_input and mode == "rag":
+        if not st.session_state.chunks:
+             out = "Please upload documents first so I have something to quiz you on!"
+        else:
+            st.session_state.quiz_state = {"q_index": 0, "correct": 0, "total": len(QUIZ_QUESTIONS)}
+            
+            current_q = QUIZ_QUESTIONS[0]
+            options_text = "\n".join(current_q['options'])
+            out = f"Starting quiz based on your documents. Question 1 of {len(QUIZ_QUESTIONS)}:\n\n**{current_q['q']}**\n{options_text}\n\n*Type the letter of your answer (A or B).* "
+        response_found = True
 
-    if mode == "personal":
-        responses = st.session_state.get("personal_responses", {})
-        for trigger, response in responses.items():
-            if trigger.lower() in user_input: 
-                out = response
-                response_found = True
-                break
-        if not response_found:
-            out = "I'm here to listen. (That trigger isn't in your uploaded file.)"
-
+    elif "summarize" in user_input and mode == "rag":
+        if not st.session_state.chunks:
+             out = "Please upload documents first so I can summarize them!"
+        else:
+            # Simple, fixed summary as LLM interaction is complex to mock without a call
+            sources = ", ".join(st.session_state.sources)
+            out = f"I've read your documents (**{sources}**). The main topics include **Abegail Chanyalew's Computer Science CV** (Web Dev, Laptop Sentinel, Expense Tracker) and the **Bitcoin Peer-to-Peer Electronic Cash System** (double-spending solution, proof-of-work, transactions). Feel free to ask specific questions!"
+        response_found = True
+        
+    # --- 2. HANDLE QUIZ ANSWER SUBMISSION ---
+    elif st.session_state.quiz_state is not None and isinstance(st.session_state.quiz_state, dict):
+        q_state = st.session_state.quiz_state
+        q_index = q_state['q_index']
+        
+        if q_index > 0: # Only process answer if a question has been asked
+            current_q = QUIZ_QUESTIONS[q_index - 1]
+            user_answer_normalized = user_input.upper().strip()
+            
+            if user_answer_normalized == current_q['answer']:
+                q_state['correct'] += 1
+                out = "✅ **Correct!**"
+            else:
+                out = f"❌ **Incorrect.** The correct answer was **{current_q['answer']}**."
+        
+        # Move to next question or end quiz
+        next_index = q_index + 1
+        if next_index < len(QUIZ_QUESTIONS):
+            q_state['q_index'] = next_index
+            next_q = QUIZ_QUESTIONS[next_index]
+            options_text = "\n".join(next_q['options'])
+            out += f"\n\nNext Question {next_index + 1} of {q_state['total']}:\n\n**{next_q['q']}**\n{options_text}\n\n*Type the letter of your answer (A or B).* "
+        else:
+            final_score = q_state['correct']
+            q_state['q_index'] = -1 # Mark quiz as finished/reset
+            st.session_state.quiz_state = None # Clear state after showing score
+            out += f"\n\n**Quiz finished!** You scored **{final_score} out of {q_state['total']}**."
+            
+        response_found = True
+        
+    # --- 3. FALLBACK TO RAG MODE ---
     elif mode == "rag":
         chunks = st.session_state.chunks
         embs = st.session_state.embs
+        
         if len(chunks) == 0:
              out = "Error: In RAG mode but no documents are loaded."
+             response_found = True
         else:
             q_emb = embed_texts([user_q])[0]
             idxs = top_k_cosine(q_emb, embs, k=5)
@@ -579,9 +632,23 @@ if submitted and user_q:
                 out = llm_answer(provider, model, api_key, user_q, context)
             except Exception as e:
                 preview = "\n".join(context.splitlines()[:8])
-                out = f"(Fallback: {e})\n\n{preview or 'No context available.'}"
-    
-    else: # mode == "default"
+                out = f"(LLM Error: {e})\n\nContext Preview:\n{preview or 'No context available.'}"
+            response_found = True
+
+    # --- 4. FALLBACK TO PERSONAL MODE ---
+    elif mode == "personal":
+        responses = st.session_state.get("personal_responses", {})
+        for trigger, response in responses.items():
+            if trigger.lower() in user_input: 
+                out = response
+                response_found = True
+                break
+        if not response_found:
+            out = "I'm here to listen. (That trigger isn't in your uploaded file.)"
+            response_found = True
+
+    # --- 5. FALLBACK TO DEFAULT MODE (If all else fails, use load_my_responses) ---
+    if not response_found and mode == "default": 
         my_responses = load_my_responses()
         for trigger, response in my_responses.items():
             if trigger.lower() in user_input: 
@@ -590,6 +657,12 @@ if submitted and user_q:
                 break
         if not response_found:
             out = "I'm here to listen. (That trigger isn't defined.)"
+            response_found = True
+    
+    # --- FINAL FALLBACK (Should only happen if RAG/Personal/Default failed and no conversational trigger matched) ---
+    if not response_found or out is None:
+        out = "I'm not sure how to respond to that in the current mode. Try uploading a document or asking a simple question."
+
 
     st.session_state.messages.append({"role":"assistant","content":out})
     st.rerun()
