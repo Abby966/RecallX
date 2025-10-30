@@ -10,8 +10,16 @@ from groq import Groq as GroqClient
 from openai import OpenAI as OpenAIClient
 import httpx
 
-# --- AUTH SETUP ---
+st.set_page_config(
+    page_title="RecallX",
+    page_icon="🧠",
+    layout="wide",
+    initial_sidebar_state="collapsed",
+)
+
+# --- Now login/session logic ---
 auth_utils.init_db()
+
 if "user" not in st.session_state:
     st.session_state.user = None
 
@@ -46,12 +54,6 @@ EMBED_MODEL = os.getenv("EMBED_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
 DEFAULT_PROVIDER = os.getenv("LLM_PROVIDER", "groq").lower()
 DEFAULT_MODEL = os.getenv("LLM_MODEL", "llama-3.1-8b-instant")
 
-st.set_page_config(
-    page_title="RecallX",
-    page_icon="🧠",
-    layout="wide",
-    initial_sidebar_state="collapsed",
-)
 
 # --- UTILITY FUNCTIONS ---
 @st.cache_resource
