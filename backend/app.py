@@ -9,18 +9,12 @@ from dotenv import load_dotenv
 from groq import Groq as GroqClient
 from openai import OpenAI as OpenAIClient
 import httpx
+load_dotenv()
+st.set_page_config(page_title="RecallX", page_icon="📦", layout="wide")
 ping = st.experimental_get_query_params().get("ping")
 if ping:
     st.write("pong")
     st.stop()  
-
-
-st.set_page_config(
-    page_title="RecallX",
-    page_icon="📦",
-    layout="wide"
-)
-st.set_page_config(page_title="RecallX", layout="wide")
 
 # --- SESSION STATE INITIALIZATION (top of script) ---
 if "messages" not in st.session_state:
