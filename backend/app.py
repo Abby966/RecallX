@@ -276,48 +276,58 @@ def top_k_cosine(query_emb: np.ndarray, doc_embs: np.ndarray, k: int = 5) -> Lis
     sims = (doc_embs @ query_emb.reshape(-1,1)).ravel()
     return np.argsort(-sims)[:k].tolist()
 
-def llm_answer(provider: str, model: str, api_key: str, question: str, context: str) -> str:
-    # Updated system prompt to allow inferred answers
-    system_msg = (
-        "You are a helpful assistant. Try to answer the question using the provided context. "
-        "If the context does not fully cover the answer, you may infer a concise and accurate answer "
-        "based on the information given. Be clear, factual, and concise."
-    )
 
+
+
+def make_http_client_no_proxy():
+  
+    return httpx.Client(timeout=60, trust_env=False)
+
+
+def llm_answer(provider: str, model: str, api_key: str, question: str, context: str) -> str:
+   
+    system_msg = (
+        "You are a helpful assistant. Use the provided context to answer the question. "
+        "If the context does not fully cover the answer, you may infer the most likely answer "
+        "based on the context. Be concise and clear."
+    )
     user_msg = f"Question: {question}\n\nContext:\n{context}\n"
 
     if provider == "groq":
         client = GroqClient(api_key=api_key, http_client=make_http_client_no_proxy())
         resp = client.chat.completions.create(
             model=model or "llama-3.1-8b-instant",
-            messages=[{"role": "system", "content": system_msg},
-                      {"role": "user", "content": user_msg}],
-            temperature=0.2, max_tokens=350
+            messages=[{"role":"system","content":system_msg},
+                      {"role":"user","content":user_msg}],
+            temperature=0.2,
+            max_tokens=350
         )
         return resp.choices[0].message.content.strip()
 
-    if provider == "openai":
+    elif provider == "openai":
         client = OpenAIClient(api_key=api_key)
         resp = client.chat.completions.create(
             model=model or "gpt-4o-mini",
-            messages=[{"role": "system", "content": system_msg},
-                      {"role": "user", "content": user_msg}],
-            temperature=0.2, max_tokens=350
+            messages=[{"role":"system","content":system_msg},
+                      {"role":"user","content":user_msg}],
+            temperature=0.2,
+            max_tokens=350
         )
         return resp.choices[0].message.content.strip()
 
-    if provider == "deepseek":
+    elif provider == "deepseek":
         client = OpenAIClient(api_key=api_key, base_url="https://api.deepseek.com")
         resp = client.chat.completions.create(
             model=model or "deepseek-chat",
-            messages=[{"role": "system", "content": system_msg},
-                      {"role": "user", "content": user_msg}],
-            temperature=0.2, max_tokens=350
+            messages=[{"role":"system","content":system_msg},
+                      {"role":"user","content":user_msg}],
+            temperature=0.2,
+            max_tokens=350
         )
         return resp.choices[0].message.content.strip()
 
-    raise RuntimeError(f"Unknown provider: {provider}")
-
+    else:
+        raise RuntimeError(f"Unknown provider: {provider}")
 
 # --- SESSION STATE ---
 if "messages" not in st.session_state:
