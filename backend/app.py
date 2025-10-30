@@ -272,7 +272,7 @@ def read_txt(file_bytes: bytes) -> str:
     except UnicodeDecodeError:
         return file_bytes.decode("latin-1", errors="ignore")
 
-Abby, [10/30/2025 9:33 PM]
+
 def chunk_text(text: str, max_chars=1000, overlap=150) -> List[str]:
     paras = [p.strip() for p in text.split("\n") if p.strip()]
     chunks, buf = [], ""
@@ -378,7 +378,7 @@ if uploaded_files:
         st.session_state.sources.append(f.name)
     st.success(f"Loaded {len(st.session_state.chunks)} document chunks!")
 
-Abby, [10/30/2025 9:33 PM]
+
 # --- CHAT AREA ---
 for m in st.session_state.messages:
     side = "rx-right" if m["role"]=="user" else "rx-left"
