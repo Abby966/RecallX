@@ -17,6 +17,25 @@ st.set_page_config(
     page_icon="📦",
     layout="wide"
 )
+# --- SESSION STATE INITIALIZATION (top of script) ---
+if "messages" not in st.session_state:
+    st.session_state["messages"] = [{"role": "assistant", "content": "Welcome to RecallX — drop a file and ask anything about it."}]
+
+if "sources" not in st.session_state:
+    st.session_state["sources"] = []
+
+if "chunks" not in st.session_state:
+    st.session_state["chunks"] = []
+
+if "embs" not in st.session_state:
+    st.session_state["embs"] = np.empty((0,384), dtype=np.float32)
+
+if "user" not in st.session_state:
+    st.session_state["user"] = None
+
+if "logged_in" not in st.session_state:
+    st.session_state["logged_in"] = False
+
 
 # --- INJECT MODERN CSS ---
 st.markdown("""
@@ -331,24 +350,6 @@ def llm_answer(provider: str, model: str, api_key: str, question: str, context: 
     else:
         raise RuntimeError(f"Unknown provider: {provider}")
 
-# --- SESSION STATE INITIALIZATION ---
-if "messages" not in st.session_state:
-    st.session_state.messages = [{"role": "assistant", "content": "Welcome to RecallX — drop a file and ask anything about it."}]
-
-if "sources" not in st.session_state:
-    st.session_state.sources = []
-
-if "show_settings" not in st.session_state:
-    st.session_state.show_settings = os.getenv("SHOW_SETTINGS", "0")
-
-if "mode" not in st.session_state:
-    st.session_state.mode = "default"
-
-if "personal_responses" not in st.session_state:
-    st.session_state.personal_responses = []
-
-if "logged_in" not in st.session_state:
-    st.session_state.logged_in = False
 
 
 # --- FILE UPLOADER ---
