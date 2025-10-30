@@ -593,4 +593,4 @@ if submitted and user_q:
 
     st.session_state.messages.append({"role":"assistant","content":out})
     st.rerun()
-old
+
