@@ -592,4 +592,4 @@ if submitted and user_q:
             out = "I'm here to listen. (That trigger isn't defined.)"
 
     st.session_state.messages.append({"role":"assistant","content":out})
-    st.rerun() is the app.py correct according to that
+    st.rerun()
