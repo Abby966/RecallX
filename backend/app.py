@@ -9,7 +9,10 @@ from dotenv import load_dotenv
 from groq import Groq as GroqClient
 from openai import OpenAI as OpenAIClient
 import httpx
-
+ping = st.experimental_get_query_params().get("ping")
+if ping:
+    st.write("pong")
+    st.stop()  
 
 
 st.set_page_config(
