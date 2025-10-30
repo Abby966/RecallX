@@ -28,7 +28,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# --- INJECTED CSS STYLES (Improved for clarity and modern look) ---
+# --- INJECTED CSS STYLES (Adjusted for Minimalism) ---
 st.markdown(
     """
     <style>
@@ -66,23 +66,13 @@ st.markdown(
     .block-container {
       padding-top: 2rem !important;
       padding-bottom: 3rem !important;
-      max-width: 900px !important; /* Slightly smaller max width for chat style */
+      max-width: 900px !important; /* Minimalist chat width */
       margin-left: auto;
       margin-right: auto;
     }
-
-    /* --- GLOBAL CARD STYLE --- */
-    .rx-card {
-      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
-      border: 1px solid var(--rx-border);
-      border-radius: 18px;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      padding: 18px 18px 14px 18px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06);
-    }
-
-    /* --- HEADER/TITLE AREA --- */
+    
+    /* --- REMOVING HEADER/TITLE CARD FROM MAIN VIEW --- */
+    /* Only show the title "RecallX" and "Settings" button in a minimal bar */
     .rx-header-container {
         display: flex;
         justify-content: space-between;
@@ -91,24 +81,24 @@ st.markdown(
         padding: 0;
     }
     .rx-title {
-      font-weight: 800;
-      font-size: 2.5rem; /* Slightly larger title */
-      letter-spacing: -0.02em;
+      font-weight: 700;
+      font-size: 1.5rem; /* Smaller, cleaner title */
+      letter-spacing: -0.01em;
       color: var(--rx-white);
       margin-bottom: 0px;
       text-shadow: 0 1px 0 rgba(0,0,0,0.4);
     }
     .rx-tagline {
-      color: var(--rx-text-dim);
-      font-weight: 500;
-      margin-top: 4px;
-      font-size: 0.95rem;
+        display: none; /* Hide the tagline in main view for minimalism */
     }
-    
-    /* File Uploader styling */
+
+    /* --- SIDEBAR STYLES (For moved functionality) --- */
+    [data-testid="stSidebar"] {
+        background: rgba(255,255,255,0.06) !important;
+    }
     .rx-uploader {
       border: 1px dashed rgba(255,255,255,0.28);
-      border-radius: 14px; /* Slightly smaller radius for upload */
+      border-radius: 14px;
       padding: 18px;
       background: rgba(255,255,255,0.05);
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
@@ -124,22 +114,21 @@ st.markdown(
       margin-bottom: 0;
     }
 
-    /* --- INPUT/FORM STYLES (ChatGPT-like continuous input) --- */
+    /* --- INPUT/FORM STYLES (Fixed at bottom) --- */
     .stTextInput input, .stTextArea textarea {
-      border-radius: 20px !important; /* Rounded corners for chat input */
-      border: none !important; /* Remove border for cleaner look */
+      border-radius: 20px !important; 
+      border: none !important; 
       background: rgba(255,255,255,0.12) !important;
       color: var(--rx-text) !important;
-      box-shadow: none; /* Removed internal shadow for cleaner look */
+      box-shadow: none; 
       padding: 15px 20px;
       min-height: 50px;
     }
     .stTextInput input:focus, .stTextArea textarea:focus {
-      outline: 2px solid var(--rx-indigo) !important; /* Simple focus ring */
+      outline: 2px solid var(--rx-indigo) !important; 
       box-shadow: none !important;
     }
     
-    /* Make the entire input container appear as a floating card */
     form[data-testid="stForm"] {
         background: rgba(255,255,255,0.06);
         border: 1px solid rgba(255,255,255,0.12);
@@ -149,15 +138,11 @@ st.markdown(
         position: fixed;
         bottom: 10px;
         width: 100%;
-        max-width: 900px;
+        max-width: 900px; /* Needs to match .block-container max-width */
         transform: translateX(-50%);
         left: 50%;
         z-index: 1000;
-        margin-left: 0 !important; /* Override Streamlit's centering */
-    }
-    form[data-testid="stForm"] .stFormSubmitButton {
-        padding: 0;
-        margin-top: 0;
+        margin-left: 0 !important;
     }
 
     /* Adjust padding below chat to account for fixed input */
@@ -165,7 +150,7 @@ st.markdown(
         padding-bottom: 150px; 
     }
 
-    /* --- BUTTON STYLES (Simplified) --- */
+    /* --- BUTTON STYLES (Refined) --- */
     .stButton > button {
       border-radius: 16px;
       border: none;
@@ -194,7 +179,7 @@ st.markdown(
       height: 40px;
     }
 
-    /* --- CHAT BUBBLE STYLES (More distinct and modern) --- */
+    /* --- CHAT BUBBLE STYLES (Modern Chat Look) --- */
     .rx-chat { margin-top: 12px; }
     .rx-row { margin: 16px 0; display: flex; align-items: flex-start; }
 
@@ -219,8 +204,8 @@ st.markdown(
       color: var(--rx-white);
       background: linear-gradient(135deg, var(--rx-indigo) 0%, var(--rx-sky) 100%);
       box-shadow: 0 5px 15px rgba(79,70,229,0.25);
-      border-radius: 20px 20px 4px 20px; /* Pointed tail at bottom-right */
-      text-align: left; /* Keep text readable */
+      border-radius: 20px 20px 4px 20px; 
+      text-align: left;
     }
 
     /* Assistant (Left Side) - Subtle Background */
@@ -231,14 +216,12 @@ st.markdown(
     }
     .rx-left .rx-bubble {
       color: var(--rx-text);
-      background: rgba(255,255,255,0.08); /* Lighter gray/off-white */
+      background: rgba(255,255,255,0.08);
       border: 1px solid rgba(255,255,255,0.1);
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      border-radius: 20px 20px 20px 4px; /* Pointed tail at bottom-left */
+      border-radius: 20px 20px 20px 4px;
     }
 
-    .rx-row:hover .rx-bubble { transform: none; } /* Remove hover effect on bubbles */
-    
     /* Info Chips (e.g., source files) */
     .rx-chip {
       display:inline-flex; align-items:center; gap:8px;
@@ -255,23 +238,27 @@ st.markdown(
       color: #a7f3d0;
     }
     
-    /* Footer */
-    .rx-footer {
-      color: var(--rx-text-dim);
-      font-size: 12.75px;
-      text-align: center;
-      margin-top: 28px;
-      opacity: .9;
+    /* Center initial welcome message */
+    .welcome-message {
+        text-align:center; 
+        font-size:1.2rem; 
+        font-weight:600; 
+        margin:15vh 0; /* Use viewport height for centering on empty screen */
+        color: var(--rx-text-dim);
     }
+    
+    /* --- Streamlit overrides for the main chat area --- */
+    .stAlert { margin-top: 15px !important; }
+    [data-testid="stDecoration"] { display: none; } /* Hide the hamburger menu if desired */
+    
 </style>
     """,
     unsafe_allow_html=True,
 )
 
-# --- UTILITY FUNCTIONS (Assume unchanged) ---
+# --- UTILITY FUNCTIONS (Unchanged from previous step) ---
 
 def get_secret(name: str, default: str = "") -> str:
-    # ... (Keep original implementation)
     try:
         if hasattr(st, "secrets") and name in st.secrets:
             return str(st.secrets.get(name, "")).strip()
@@ -281,17 +268,14 @@ def get_secret(name: str, default: str = "") -> str:
 
 @st.cache_resource(show_spinner=False)
 def get_model(name: str):
-    # ... (Keep original implementation)
     return SentenceTransformer(name, trust_remote_code=True)
 
 def embed_texts(texts: List[str]) -> np.ndarray:
-    # ... (Keep original implementation)
     model = get_model(EMBED_MODEL)
     embs = model.encode(texts, normalize_embeddings=True, convert_to_numpy=True)
     return embs.astype(np.float32)
 
 def read_pdf(file_bytes: bytes) -> str:
-    # ... (Keep original implementation)
     reader = PdfReader(io.BytesIO(file_bytes))
     parts = []
     for page in reader.pages:
@@ -302,14 +286,12 @@ def read_pdf(file_bytes: bytes) -> str:
     return "\n".join(parts)
 
 def read_txt(file_bytes: bytes) -> str:
-    # ... (Keep original implementation)
     try:
         return file_bytes.decode("utf-8")
     except UnicodeDecodeError:
         return file_bytes.decode("latin-1", errors="ignore")
 
 def chunk_text(text: str, max_chars: int = 1000, overlap: int = 150) -> List[str]:
-    # ... (Keep original implementation)
     paras = [p.strip() for p in text.split("\n") if p.strip()]
     chunks, buf = [], ""
     for p in paras:
@@ -335,17 +317,14 @@ def chunk_text(text: str, max_chars: int = 1000, overlap: int = 150) -> List[str
     return final
 
 def top_k_cosine(query_emb: np.ndarray, doc_embs: np.ndarray, k: int = 5) -> List[int]:
-    # ... (Keep original implementation)
     if doc_embs.shape[0] == 0: return []
     sims = (doc_embs @ query_emb.reshape(-1,1)).ravel()
     return np.argsort(-sims)[:k].tolist()
 
 def make_http_client_no_proxy():
-    # ... (Keep original implementation)
     return httpx.Client(timeout=60, trust_env=False)
 
 def llm_answer(provider: str, model: str, api_key: str, question: str, context: str) -> str:
-    # ... (Keep original implementation)
     system_msg = (
         "You are a precise assistant. Answer ONLY from the provided context. "
         "If the answer is not in the context, say: 'I couldn’t find this in the document.' "
@@ -384,20 +363,18 @@ def llm_answer(provider: str, model: str, api_key: str, question: str, context: 
 
 @st.cache_data(show_spinner=False)
 def load_my_responses():
-    # ... (Keep original implementation)
     try:
-        # NOTE: Fixed typo in filename if it was meant to be my_responses.json
         with open('my_responses.json', 'r', encoding='utf-8') as f:
             return json.load(f)
     except FileNotFoundError:
-        st.error("Warning: 'my_responses.json' file not found. Default chatbot features disabled.")
+        # Do not use st.error here, as it breaks the minimalist design
         return {}
     except json.JSONDecodeError:
-        st.error("Warning: 'my_responses.json' has a formatting error. Default chatbot features disabled.")
+        # Do not use st.error here, as it breaks the minimalist design
         return {}
 
 
-# --- SESSION STATE SETUP (Keep unchanged) ---
+# --- SESSION STATE SETUP (Unchanged) ---
 if "messages" not in st.session_state:
     st.session_state.messages = [
         {"role":"assistant","content":"Welcome to RecallX — drop a file and ask anything about it."}
@@ -416,59 +393,62 @@ if "personal_responses" not in st.session_state:
     st.session_state.personal_responses = {}
 
 
-# --- HEADER AREA (Simplified Layout) ---
+# --- MINIMALIST HEADER BAR ---
 st.markdown('<div class="rx-header-container">', unsafe_allow_html=True)
-
-# Container for Title and Tagline (left side)
-st.markdown('<div>', unsafe_allow_html=True)
 st.markdown('<div class="rx-title">RecallX</div>', unsafe_allow_html=True)
-st.markdown('<div class="rx-tagline">Upload a document • Get answers • Stay in flow</div>', unsafe_allow_html=True)
-st.markdown('</div>', unsafe_allow_html=True)
 
-# Settings Button (right side)
-if st.button("⚙️ Settings", key="toggle_settings", help="Show/hide provider & API key", type="secondary"):
+# Settings Button (toggles sidebar)
+if st.button("⚙️ Settings", key="toggle_settings", help="Show/hide settings and upload area", type="secondary"):
     st.session_state.show_settings = not st.session_state.show_settings
 
 st.markdown('</div>', unsafe_allow_html=True)
-st.markdown('---') # Visual separator
+st.markdown('---') # Minimal visual separator
 
-# --- SIDEBAR/SETTINGS (Keep unchanged) ---
-if st.session_state.show_settings:
-    with st.sidebar:
-        st.markdown("### ⚙️ Settings")
-        provider = st.selectbox("Provider", ["groq","openai","deepseek"],
-                                index=["groq","openai","deepseek"].index(DEFAULT_PROVIDER))
-        default_model = "llama-3.1-8b-instant" if provider=="groq" else ("gpt-4o-mini" if provider=="openai" else "deepseek-chat")
-        model = st.text_input("Model", value=os.getenv("LLM_MODEL", default_model))
-        key_env = {"groq":"GROQ_API_KEY","openai":"OPENAI_API_KEY","deepseek":"DEEPSEEK_API_KEY"}[provider]
-        api_key = st.text_input(key_env, value=os.getenv(key_env, ""), type="password")
-        if st.button("Clear memory"):
-            st.session_state.chunks = []
-            st.session_state.embs = np.empty((0,384), dtype=np.float32)
-            st.session_state.sources = []
-            st.session_state.messages = [{"role":"assistant","content":"Welcome to RecallX — drop a file and ask anything about it."}]
-            st.session_state.mode = "default"
-            st.session_state.personal_responses = {}
-else:
-    provider = DEFAULT_PROVIDER
-    model = os.getenv("LLM_MODEL", DEFAULT_MODEL)
-    env_map = {"groq":"GROQ_API_KEY","openai":"OPENAI_API_KEY","deepseek":"DEEPSEEK_API_KEY"}
-    api_key = os.getenv(env_map[provider], "")
 
-# --- FILE UPLOADER (Enclosed in a card and uploader div) ---
-st.markdown('<div class="rx-card">', unsafe_allow_html=True)
-st.markdown('<div class="rx-uploader">', unsafe_allow_html=True)
-uploaded_files = st.file_uploader(
-    "Upload PDFs, text files, or your personal response file",
-    type=["pdf", "txt", "json"],
-    accept_multiple_files=True,
-    label_visibility="collapsed",
-)
-st.markdown('</div>', unsafe_allow_html=True)
-st.markdown('</div>', unsafe_allow_html=True)
-st.markdown('---') # Visual separator
+# --- SIDEBAR/SETTINGS (RAG/Personal/API Controls moved here) ---
+with st.sidebar:
+    st.markdown("### ⚙️ Settings")
+    provider = st.selectbox("Provider", ["groq","openai","deepseek"],
+                            index=["groq","openai","deepseek"].index(DEFAULT_PROVIDER))
+    default_model = "llama-3.1-8b-instant" if provider=="groq" else ("gpt-4o-mini" if provider=="openai" else "deepseek-chat")
+    model = st.text_input("Model", value=os.getenv("LLM_MODEL", default_model))
+    key_env = {"groq":"GROQ_API_KEY","openai":"OPENAI_API_KEY","deepseek":"DEEPSEEK_API_KEY"}[provider]
+    api_key = st.text_input(key_env, value=os.getenv(key_env, ""), type="password")
+    
+    st.markdown("---")
+    st.markdown("### 💾 Data Management")
 
-# --- FILE PROCESSING LOGIC (Keep unchanged) ---
+    # --- FILE UPLOADER (Moved to sidebar) ---
+    st.markdown('<div class="rx-uploader">', unsafe_allow_html=True)
+    uploaded_files = st.file_uploader(
+        "Upload PDFs, text files, or your personal response file",
+        type=["pdf", "txt", "json"],
+        accept_multiple_files=True,
+        label_visibility="collapsed",
+        key="sidebar_uploader" # Added key for uniqueness
+    )
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    if st.button("Clear memory and chat"):
+        st.session_state.chunks = []
+        st.session_state.embs = np.empty((0,384), dtype=np.float32)
+        st.session_state.sources = []
+        st.session_state.messages = [{"role":"assistant","content":"Welcome to RecallX — drop a file and ask anything about it."}]
+        st.session_state.mode = "default"
+        st.session_state.personal_responses = {}
+        st.rerun() # Rerun immediately after clearing
+        
+    # --- NON-VISIBLE API KEY ASSIGNMENT ---
+    # This block ensures API key selection/input is managed even when settings are hidden.
+    if not st.session_state.show_settings:
+        provider = DEFAULT_PROVIDER
+        model = os.getenv("LLM_MODEL", DEFAULT_MODEL)
+        env_map = {"groq":"GROQ_API_KEY","openai":"OPENAI_API_KEY","deepseek":"DEEPSEEK_API_KEY"}
+        api_key = os.getenv(env_map[provider], "")
+        
+
+# --- FILE PROCESSING LOGIC (Triggered by sidebar uploader) ---
+# NOTE: The file processing logic must run *after* the sidebar is defined if `uploaded_files` is to be used.
 if uploaded_files:
     # Reset RAG and personal modes before processing files
     st.session_state.chunks = []
@@ -481,19 +461,16 @@ if uploaded_files:
         data = uploaded.read()
         name = uploaded.name.lower()
         
-        # Corrected file name check based on provided my_responses.json and existing code logic
         if name in ["my_responses.json", "myrespose.txt"]: 
             try:
                 st.session_state.personal_responses = json.loads(data.decode("utf-8"))
                 st.session_state.mode = "personal"
-                st.success(f"Loaded personal responses from {uploaded.name}!")
-                # If personal file is found, break and ignore other files
+                st.sidebar.success(f"Loaded personal responses from {uploaded.name}!")
                 break 
             except Exception as e:
-                st.error(f"Failed to load personal responses from {uploaded.name}: Invalid JSON format. {e}")
+                st.sidebar.error(f"Failed to load personal responses from {uploaded.name}: Invalid JSON format. {e}")
                 st.session_state.mode = "default"
         else:
-            # This is a normal RAG document
             st.session_state.mode = "rag"
             ext = os.path.splitext(name)[1]
             text = read_pdf(data) if ext == ".pdf" else read_txt(data)
@@ -512,26 +489,26 @@ if uploaded_files:
                 st.session_state.chunks.extend(new_chunks)
                 st.session_state.sources.append(uploaded.name)
             else:
-                st.error(f"No extractable text found in {uploaded.name}.")
+                st.sidebar.error(f"No extractable text found in {uploaded.name}.")
     
-    # After loop, update status
     if st.session_state.mode == "rag":
-        st.success(f"Loaded {len(st.session_state.chunks)} document chunks.")
+        st.sidebar.success(f"Loaded {len(st.session_state.chunks)} document chunks.")
+    st.rerun() # Rerun to update chat state/chips
 
 
-# --- INFO CHIPS (Keep unchanged) ---
+# --- INFO CHIPS (Below header, kept minimal) ---
 if st.session_state.sources:
     chips = "".join(f"<span class='rx-chip'>📄 {os.path.basename(s)}</span>" for s in st.session_state.sources)
     st.markdown(f"<div>{chips}</div>", unsafe_allow_html=True)
 elif st.session_state.mode == "personal":
     st.markdown(f"<div><span class='rx-chip rx-chip-personal'>🧠 Personal Mode Active</span></div>", unsafe_allow_html=True)
 
-# --- INITIAL MESSAGE (Keep unchanged) ---
+
+# --- INITIAL MESSAGE (Centered on empty screen) ---
+# Only show the centered message if *only* the welcome message exists
 if len(st.session_state.messages) == 1:
     st.markdown(
-        "<div style='text-align:center; font-size:1.2rem; font-weight:600; margin:40px 0;'>" # Increased margin 
-        + st.session_state.messages[0]["content"] +
-        "</div>",
+        f'<div class="welcome-message">{st.session_state.messages[0]["content"]}</div>',
         unsafe_allow_html=True
     )
 
@@ -541,10 +518,10 @@ if len(st.session_state.messages) == 1:
 chat_box = st.container()
 with chat_box:
     st.markdown('<div class="rx-chat">', unsafe_allow_html=True)
-    # Start loop from 0 to display the initial welcome message with new styling
-    for m in st.session_state.messages: 
+    # Start loop from 0 if there are more than 1 messages, otherwise, the message is centered (above)
+    start_index = 1 if len(st.session_state.messages) > 1 else 0
+    for m in st.session_state.messages[start_index:]:
         side = "rx-right" if m["role"] == "user" else "rx-left"
-        # Use st.expander for the chat bubble content for better Streamlit rendering compatibility
         with st.container():
             st.markdown(
                 f'<div class="rx-row {side}"><div class="rx-bubble">{m["content"]}</div></div>',
@@ -553,7 +530,7 @@ with chat_box:
     st.markdown('</div>', unsafe_allow_html=True)
 
 
-# --- INPUT FORM (Now a fixed element at the bottom) ---
+# --- INPUT FORM (Fixed element at the bottom) ---
 with st.form("ask_form", clear_on_submit=True):
     # Use columns to align text input and button horizontally
     q_col, b_col = st.columns([10, 1]) 
@@ -562,11 +539,11 @@ with st.form("ask_form", clear_on_submit=True):
         user_q = st.text_input("Ask anything...", "", label_visibility="collapsed")
         
     with b_col:
-        # Use a send button style for a modern chat feel
+        # Send button
         submitted = st.form_submit_button("Send", use_container_width=True, type="primary")
 
 
-# --- ANSWER LOGIC (Keep unchanged) ---
+# --- ANSWER LOGIC (Unchanged) ---
 if submitted and user_q:
     st.session_state.messages.append({"role":"user","content":user_q})
 
@@ -578,7 +555,7 @@ if submitted and user_q:
     if mode == "personal":
         responses = st.session_state.get("personal_responses", {})
         for trigger, response in responses.items():
-            if trigger.lower() in user_input:
+            if trigger.lower() in user_input: 
                 out = response
                 response_found = True
                 break
@@ -613,7 +590,6 @@ if submitted and user_q:
     else: # mode == "default"
         my_responses = load_my_responses()
         for trigger, response in my_responses.items():
-            # Check if the trigger phrase is *inside* the user's input, more flexible match
             if trigger.lower() in user_input: 
                 out = response
                 response_found = True
@@ -623,4 +599,3 @@ if submitted and user_q:
 
     st.session_state.messages.append({"role":"assistant","content":out})
     st.rerun()
-
