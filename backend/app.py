@@ -1,5 +1,6 @@
-
-import os, io, json
+import os
+import io
+import json
 from typing import List
 import numpy as np
 import streamlit as st
@@ -10,22 +11,35 @@ from dotenv import load_dotenv
 from groq import Groq as GroqClient
 from openai import OpenAI as OpenAIClient
 import httpx
-if os.path.exists("users.db"):
-    os.remove("users.db")
-ping = st.experimental_get_query_params().get("ping")
-if ping:
-    st.write("pong")
-    st.stop()  
 
-
+# --- STREAMLIT CONFIG (must be first Streamlit call) ---
 st.set_page_config(
     page_title="RecallX",
     page_icon="📦",
     layout="wide"
 )
-# --- SESSION STATE INITIALIZATION (top of script) ---
+
+# --- OPTIONAL: Handle ping for health check ---
+ping = st.experimental_get_query_params().get("ping")
+if ping:
+    st.write("pong")
+    st.stop()
+
+# --- (OPTIONAL) Reset users.db during debugging ---
+if os.path.exists("users.db"):
+    os.remove("users.db")
+
+# --- Initialize database ---
+auth_utils.init_db()
+
+# --- LOAD ENVIRONMENT VARIABLES ---
+load_dotenv()
+
+# --- SESSION STATE INITIALIZATION ---
 if "messages" not in st.session_state:
-    st.session_state["messages"] = [{"role": "assistant", "content": "Welcome to RecallX — drop a file and ask anything about it."}]
+    st.session_state["messages"] = [
+        {"role": "assistant", "content": "Welcome to RecallX — drop a file and ask anything about it."}
+    ]
 
 if "sources" not in st.session_state:
     st.session_state["sources"] = []
@@ -34,13 +48,14 @@ if "chunks" not in st.session_state:
     st.session_state["chunks"] = []
 
 if "embs" not in st.session_state:
-    st.session_state["embs"] = np.empty((0,384), dtype=np.float32)
+    st.session_state["embs"] = np.empty((0, 384), dtype=np.float32)
 
 if "user" not in st.session_state:
     st.session_state["user"] = None
 
 if "logged_in" not in st.session_state:
     st.session_state["logged_in"] = False
+
 
 
 # --- INJECT MODERN CSS ---
