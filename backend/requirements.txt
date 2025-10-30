@@ -3,7 +3,8 @@
 # core
 streamlit==1.36.0
 python-dotenv==1.0.1
-numpy==2.2.2
+numpy>=1.26.0,<2.0
+
 pypdf==4.3.1
 
 # PyTorch CPU wheels (stable on 3.11)
