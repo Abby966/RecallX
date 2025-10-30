@@ -20,6 +20,8 @@ st.set_page_config(
     page_icon="📦",
     layout="wide"
 )
+st.set_page_config(page_title="RecallX", layout="wide")
+
 # --- SESSION STATE INITIALIZATION (top of script) ---
 if "messages" not in st.session_state:
     st.session_state["messages"] = [{"role": "assistant", "content": "Welcome to RecallX — drop a file and ask anything about it."}]
@@ -213,37 +215,64 @@ if st.session_state.sources:
     chips = "".join(f"<span class='rx-chip'>{s}</span>" for s in st.session_state.sources)
     st.markdown(f"<div>{chips}</div>", unsafe_allow_html=True)
 
-# --- Now login/session logic ---
-auth_utils.init_db()
 
-if "user" not in st.session_state:
-    st.session_state.user = None
-
-st.sidebar.markdown("## 🔐 User Login / Signup")
-auth_mode = st.sidebar.radio("Mode", ["Login", "Signup"])
-username = st.sidebar.text_input("Username", key="auth_username")
-password = st.sidebar.text_input("Password", type="password", key="auth_password")
-
-if auth_mode == "Signup" and st.sidebar.button("Create Account"):
-    if username and password:
-        if auth_utils.create_user(username, password):
-            st.success("Account created! Please log in.")
-        else:
-            st.error("Username already exists.")
-    else:
-        st.warning("Enter username and password.")
-
-elif auth_mode == "Login" and st.sidebar.button("Login"):
-    if auth_utils.authenticate(username, password):
-        st.session_state.user = username
-        st.success(f"Logged in as {username}")
-    else:
-        st.error("Invalid credentials")
-
+# --- LOGIN / SIGNUP SCREEN ---
 if not st.session_state.user:
-    st.warning("Please login to access RecallX features.")
-    st.stop()
+    st.markdown(
+        """
+        <style>
+        .center-box {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 90vh;
+            flex-direction: column;
+            text-align: center;
+        }
+        .title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        .subtitle {
+            color: gray;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
 
+    st.markdown(
+        """
+        <div class="center-box">
+            <div class="title">Welcome to RecallX 🔐</div>
+            <div class="subtitle">Sign in or create an account to continue</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    tab1, tab2 = st.tabs(["🔑 Login", "🆕 Sign Up"])
+
+    with tab1:
+        username = st.text_input("Username")
+        password = st.text_input("Password", type="password")
+        if st.button("Login", use_container_width=True):
+            if username == "admin" and password == "1234":  # example logic
+                st.session_state.user = username
+                st.success("Login successful! Reloading...")
+                st.rerun()
+            else:
+                st.error("Invalid credentials")
+
+    with tab2:
+        new_username = st.text_input("Choose a username")
+        new_password = st.text_input("Choose a password", type="password")
+        if st.button("Create Account", use_container_width=True):
+            st.success("Account created! Please log in.")
+    st.stop()
 # --- ENV VARS & SETTINGS ---
 load_dotenv()
 EMBED_MODEL = os.getenv("EMBED_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
