@@ -2,7 +2,10 @@ import sqlite3
 import hashlib
 import os
 
-DB_FILE = "users.db"
+# ✅ Persistent database path
+DB_DIR = os.path.join(os.path.expanduser("~"), ".streamlit_data")
+os.makedirs(DB_DIR, exist_ok=True)
+DB_FILE = os.path.join(DB_DIR, "users.db")
 
 def init_db():
     """Ensure the users table exists."""
