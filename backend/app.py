@@ -12,6 +12,11 @@ from groq import Groq as GroqClient
 from openai import OpenAI as OpenAIClient
 import httpx
 
+
+
+
+auth_utils.init_db()
+
 # --- STREAMLIT CONFIG (must be first Streamlit call) ---
 st.set_page_config(
     page_title="RecallX",
@@ -29,8 +34,7 @@ if ping:
 if os.path.exists("users.db"):
     os.remove("users.db")
 
-# --- Initialize database ---
-auth_utils.init_db()
+
 
 # --- LOAD ENVIRONMENT VARIABLES ---
 load_dotenv()
