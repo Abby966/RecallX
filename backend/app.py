@@ -279,9 +279,14 @@ DEFAULT_MODEL = os.getenv("LLM_MODEL", "llama-3.1-8b-instant")
 def get_model(name: str):
     return SentenceTransformer(name, trust_remote_code=True)
 
-def embed_texts(texts: List[str]) -> np.ndarray:
-    model = get_model(EMBED_MODEL)
-    return model.encode(texts, normalize_embeddings=True, convert_to_numpy=True).astype(np.float32)
+def embed_texts(texts):
+    if not texts:
+        return np.empty((0, 384), dtype=np.float32)
+    return model.encode(
+        texts,
+        normalize_embeddings=True,
+        convert_to_numpy=True
+    ).astype(np.float32)
 
 def read_pdf(file_bytes: bytes) -> str:
     reader = PdfReader(io.BytesIO(file_bytes))
